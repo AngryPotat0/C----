@@ -1,15 +1,16 @@
 from enum import Enum
 
 class TokenType(Enum):
-    PLUS =      '+'
-    MINUS =     '-'
-    MULIT =     '*'
-    DIVES =     '/'
-    MOD =       '%'
-    LPAREN =    '('
-    RPAREN =    ')'
-    Num =       'Num'
-    EOF =       'EOF'
+    PLUS =              '+'
+    MINUS =             '-'
+    MULIT =             '*'
+    DIVES =             '/'
+    MOD =               '%'
+    LPAREN =            '('
+    RPAREN =            ')'
+    INTEGER_CONST =     'INTEGER_CONST'
+    REAL_CONST =        'REAL_CONST'
+    EOF =               'EOF'
 
 class Token():
     def __init__(self, type,value):
@@ -42,11 +43,12 @@ class Lexer():
             self.advance()
         if(self.currentChar == '.'):
             res += '.'
+            self.advance()
             while(self.currentChar != None and self.currentChar.isdigit()):
                 res += self.currentChar
                 self.advance()
-            return float(res)
-        return int(res)
+            return Token(TokenType.REAL_CONST,float(res))
+        return Token(TokenType.INTEGER_CONST,int(res))
 
     def error(self):
         raise Exception('Unexpectde char')
@@ -59,8 +61,8 @@ class Lexer():
                 self.skip_whitespace()
                 continue
             if(self.currentChar.isdigit()):
-                value = self.number()
-                token = Token(TokenType.Num,value)
+                token = self.number()
+                # print('This:::',token.value)
                 return token
             try:
                 token_type = TokenType(self.currentChar)
@@ -81,7 +83,7 @@ class BinOp(AST):
 
 class Num(AST):
     def __init__(self,token):
-        self.token = token
+        self.type = token.type
         self.value = token.value
 
 class Parser():
@@ -113,12 +115,14 @@ class Parser():
 
     def term(self):
         node = self.paren()
-        while(self.currentToken.type in (TokenType.MULIT, TokenType.DIVES)):
+        while(self.currentToken.type in (TokenType.MULIT, TokenType.DIVES, TokenType.MOD)):
             op = self.currentToken
             if(op.type == TokenType.MULIT):
                 self.eat(TokenType.MULIT)
-            else:
+            elif(op.type == TokenType.DIVES):
                 self.eat(TokenType.DIVES)
+            else:
+                self.eat(TokenType.MOD)
             node = BinOp(node,self.paren(),op)
         return node
 
@@ -130,7 +134,10 @@ class Parser():
             self.eat(TokenType.RPAREN)
         else:
             node = Num(self.currentToken)
-            self.eat(TokenType.Num)
+            if(self.currentToken.type == TokenType.INTEGER_CONST):
+                self.eat(TokenType.INTEGER_CONST)
+            else:
+                self.eat(TokenType.REAL_CONST)
         return node
 
 class Interpreter():
