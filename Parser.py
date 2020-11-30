@@ -47,6 +47,14 @@ class Parser():
             self.eat(TokenType.LPAREN)
             node = self.expr()
             self.eat(TokenType.RPAREN)
+        elif(self.currentToken.type in (TokenType.PLUS, TokenType.MINUS)):
+            op = self.currentToken
+            if(op.type == TokenType.PLUS):
+                self.eat(TokenType.PLUS)
+            else:
+                self.eat(TokenType.MINUS)
+            expr = self.expr()
+            node = UnaryOp(expr, op)
         else:
             node = Num(self.currentToken)
             if(self.currentToken.type == TokenType.INTEGER_CONST):

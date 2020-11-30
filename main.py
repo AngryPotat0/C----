@@ -1,8 +1,9 @@
 from Lexer import*
 from Parser import*
 from Interpreter import*
-
+from Token import*
 def main():
+    reserved_keywords()
     text = input('Please input:')
     lex = Lexer(text)
     parser = Parser(lex)

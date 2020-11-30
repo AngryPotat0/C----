@@ -5,6 +5,7 @@ class Lexer():
         self.text = text
         self.pos = 0
         self.currentChar = self.text[self.pos]
+        self.reserved_keywords = reserved_keywords()
     
     def advance(self):
         self.pos += 1
@@ -30,6 +31,15 @@ class Lexer():
                 self.advance()
             return Token(TokenType.REAL_CONST,float(res))
         return Token(TokenType.INTEGER_CONST,int(res))
+    
+    def _id(self):
+        result = ''
+        while(self.currentChar != None and self.currentChar.isalnum()):
+            result += self.currentChar
+            self.advance()
+        if(result in self.reserved_keywords):
+            return self.reserved_keywords[result]
+        return Token(TokenType.ID, result)
 
     def error(self):
         raise Exception('Unexpectde char')
@@ -42,9 +52,10 @@ class Lexer():
                 self.skip_whitespace()
                 continue
             if(self.currentChar.isdigit()):
-                token = self.number()
-                # print('This:::',token.value)
-                return token
+                return self.number()
+            if(self.currentChar.isalnum()):
+                return self._id()
+
             try:
                 token_type = TokenType(self.currentChar)
             except ValueError:
