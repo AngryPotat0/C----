@@ -9,6 +9,7 @@ class TokenType(Enum):
     LPAREN =    '('
     RPAREN =    ')'
     Num =       'Num'
+    EOF =       'EOF'
 
 class Token():
     def __init__(self, type,value):
@@ -53,7 +54,7 @@ class Lexer():
     def get_next_token(self):
         while(True):
             if(self.currentChar == None):
-                return None
+                return Token(TokenType.EOF,None)
             if(self.currentChar == ' '):
                 self.skip_whitespace()
                 continue
@@ -94,7 +95,7 @@ class Parser():
         self.currentToken = self.lex.get_next_token()
     
     def error(self):
-        raise Exception('Unexpected Token')
+        raise Exception('Unexpected Token{token}'.format(token = self.currentToken))
     
     def parser(self):
         return self.expr()
@@ -127,8 +128,9 @@ class Parser():
             self.eat(TokenType.LPAREN)
             node = self.expr()
             self.eat(TokenType.RPAREN)
-        node = Num(self.currentToken)
-        self.eat(TokenType.Num)
+        else:
+            node = Num(self.currentToken)
+            self.eat(TokenType.Num)
         return node
 
 class Interpreter():
@@ -142,20 +144,23 @@ class Interpreter():
             '%':    lambda a,b: a % b
         }
     
-    def caculate(self,a,b,op):
+    def calculate(self,a,b,op):
         return self.calcu[op](a,b)
     
     def visit(self,node):
-        if(node.type == TokenType.Num):
+        if(isinstance(node,Num)):
             return node.value
-        if(node.type in (TokenType.PLUS, TokenType.MINUS, TokenType.MULIT, TokenType.DIVES, TokenType.MOD)):
-            return self.calculate(node.left,node.right,node.value)
+        if(node.op.type in (TokenType.PLUS, TokenType.MINUS, TokenType.MULIT, TokenType.DIVES, TokenType.MOD)):
+            return self.calculate(self.visit(node.left),self.visit(node.right),node.op.value)
+    
+    def run(self):
+        return self.visit(self.ast)
 
 def main():
     text = input('Please input:')
     lex = Lexer(text)
     parser = Parser(lex)
     interpreter = Interpreter(parser.parser())
-    print(interpreter.visit())
+    print(interpreter.run())
 
 main()
