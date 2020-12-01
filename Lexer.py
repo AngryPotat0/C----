@@ -60,7 +60,7 @@ class Lexer():
             if(self.currentChar == '=' and self.peek() == '='):
                 self.advance()
                 self.advance()
-                return Token(TokenType.BEQULE, '==')
+                return Token(TokenType.BEQUAL, '==')
             if(self.currentChar == '>' and self.peek() == '='):
                 self.advance()
                 self.advance()

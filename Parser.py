@@ -17,6 +17,18 @@ class Parser():
     def parser(self):
         return self.expr()
 
+    def var_deccl(self):
+        val = self.variable()
+        self.eat(TokenType.EQUAL)
+        expr = self.expr()
+        return Var_decl(val, expr)#FIXME:
+
+    def variable(self):
+        var = self.currentToken
+        self.eat(TokenType.ID)
+        res = Var(var)
+        return res
+
     def expr(self):
         node = self.term()
         while(self.currentToken.type in (TokenType.PLUS, TokenType.MINUS)):
