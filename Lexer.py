@@ -1,5 +1,5 @@
 from Token import*
-
+# import Token
 class Lexer():
     def __init__(self,text):
         self.text = text
@@ -13,6 +13,12 @@ class Lexer():
             self.currentChar = None
             return
         self.currentChar = self.text[self.pos]
+    
+    def peek(self):
+        idx = self.pos + 1
+        if(idx >= len(self.text)):
+            return None
+        return self.text[idx]
     
     def skip_whitespace(self):
         while(self.currentChar != None and self.currentChar == ' '):
@@ -51,6 +57,18 @@ class Lexer():
             if(self.currentChar == ' '):
                 self.skip_whitespace()
                 continue
+            if(self.currentChar == '=' and self.peek() == '='):
+                self.advance()
+                self.advance()
+                return Token(TokenType.BEQULE, '==')
+            if(self.currentChar == '>' and self.peek() == '='):
+                self.advance()
+                self.advance()
+                return Token(TokenType.GE, '>=')
+            if(self.currentChar == '<' and self.peek() == '='):
+                self.advance()
+                self.advance()
+                return Token(TokenType.LE, '<=')
             if(self.currentChar.isdigit()):
                 return self.number()
             if(self.currentChar.isalnum()):
