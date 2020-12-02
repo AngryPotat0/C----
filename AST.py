@@ -17,7 +17,9 @@ class Param(AST):
         self.type_node = type_node
 
 class Code_Block(AST):
-    pass
+    def __init__(self,declarations,compound_statement):
+        self.declarations = declarations
+        self.compound_statement = compound_statement
 
 class Type(AST):
     def __init__(self,token):
@@ -26,11 +28,13 @@ class Type(AST):
 
 class Var(AST):
     def __init__(self,token):
-        self.var_name = token.value
+        self.token = token
+        self.value = token.value
 
 class Var_decl(AST):
-    def __init__(self):
-        pass
+    def __init__(self,var_name, type_node):
+        self.var_node = var_node
+        self.type_node = type_node
 
 class Assign(AST):
     def __init__(self,left,right):

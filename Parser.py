@@ -39,8 +39,9 @@ class Parser():
         result = []
         while(True):
             param_type = self.type_spec()
-            param = self.currentToken.value
-            self.eat(TokenType.ID)
+            # param = self.currentToken.value
+            # self.eat(TokenType.ID)#FIXME:
+            param = self.variable()
             result.append(Param(param,param_type))
             if(self.currentToken.type == TokenType.RPAREN):
                 break
@@ -50,20 +51,30 @@ class Parser():
     def code_block(self):
         self.eat(TokenType.LBRACE)
         #FIXME: 然后呢？？？？？
+        declarations = self.declarations()
+        compound_statement = self.compound_statement()
+        self.eat(TokenType.RBRACE)
+        return Code_Block(declarations,combound_statement)
 
     def declarations(self):
         result = []
         while(self.currentToken.type in (TokenType.INT, TokenType.REAL)):
             result.append(self.var_decl())
             self.eat(TokenType.SEMI)
+        return result
 
-    def var_decl(self):
+    def var_decl(self):#FIXME:
         var_type = self.type_spec()
-        val = self.variable()
-        self.eat(TokenType.EQUAL)
-        expr = self.expr()
-        self.eat(TokenType.SEMI)
-        return Var_decl(var, var_type, expr)
+        var_name_list = []
+        while(True):
+            var_name_list.append(self.variable())
+            if(self.currentToken.type == TokenType.SEMI):
+                break
+            self.eat(TokenType.COMMA)
+        var_list = []
+        for var_name in var_name_list:
+            var_list.append(Var_decl(var_name,var_type))
+        return var_list
 
     def type_spec(self):
         if(self.currentToken.type == TokenType.INT):
@@ -81,8 +92,15 @@ class Parser():
         res = Var(var)
         return res
 
-    def combound_statement(self):
+    def compound_statement(self):
         pass
+
+    def assign(self):
+        left = self.variable()
+        self.eat(TokenType.EQUAL)
+        right = self.expr()
+        self.eat(TokenType.SEMI)
+        return Assign(left, right)
 
     def expr(self):
         node = self.term()
