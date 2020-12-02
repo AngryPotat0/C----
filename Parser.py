@@ -1,6 +1,7 @@
 from Token import*
 from AST import*
 
+
 class Parser():
     def __init__(self,lex):
         self.lex = lex
@@ -15,19 +16,73 @@ class Parser():
         raise Exception('Unexpected Token{token}'.format(token = self.currentToken))
     
     def parser(self):
-        return self.expr()
+        return self.program()
+    
+    def program(self):
+        functions_list = []
+        while(self.currentToken.type != TokenType.EOF):
+            functions_list.append(self.fuction_decl())
+        # main_function = [fun for fun in functions_list if fun.name == 'main']
+        # if(main_function == []):
+        #     self.error()
+        return Program(functions_list)
 
-    def var_deccl(self):
+    def function_decl(self):
+        func_type = self.type_spec()
+        func_name = self.variable().var_name
+        func_params = self.params()
+        func_body = self.code_block()
+        return Function(func_type, func_name, func_params, func_body)
+
+    def params(self):
+        self.eat(TokenType.LPAREN)
+        result = []
+        while(True):
+            param_type = self.type_spec()
+            param = self.currentToken.value
+            self.eat(TokenType.ID)
+            result.append(Param(param,param_type))
+            if(self.currentToken.type == TokenType.RPAREN):
+                break
+            self.eat(TokenType.COMMA)
+        return result
+
+    def code_block(self):
+        self.eat(TokenType.LBRACE)
+        #FIXME: 然后呢？？？？？
+
+    def declarations(self):
+        result = []
+        while(self.currentToken.type in (TokenType.INT, TokenType.REAL)):
+            result.append(self.var_decl())
+            self.eat(TokenType.SEMI)
+
+    def var_decl(self):
+        var_type = self.type_spec()
         val = self.variable()
         self.eat(TokenType.EQUAL)
         expr = self.expr()
-        return Var_decl(val, expr)#FIXME:
+        self.eat(TokenType.SEMI)
+        return Var_decl(var, var_type, expr)
+
+    def type_spec(self):
+        if(self.currentToken.type == TokenType.INT):
+            result = Type(self.currentToken)
+            self.eat(TokenType.INT)
+            return result
+        else:
+            result = Type(self.currentToken)
+            self.eat(TokenType.REAL)
+            return result
 
     def variable(self):
         var = self.currentToken
         self.eat(TokenType.ID)
         res = Var(var)
         return res
+
+    def combound_statement(self):
+        pass
 
     def expr(self):
         node = self.term()
