@@ -41,6 +41,20 @@ class Assign(AST):
         self.left = left
         self.right = right
 
+class Function_call(AST):
+    def __init__(self,function_name,real_params):
+        self.function_name = function_name
+        self.real_params = real_params
+
+class If(AST):
+    pass
+
+class While(AST):
+    pass
+
+class For(AST):
+    pass
+
 class BinOp(AST):
     def __init__(self,left,right,op):
         self.left = left

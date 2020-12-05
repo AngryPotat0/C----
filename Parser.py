@@ -59,7 +59,7 @@ class Parser():
     def declarations(self):
         result = []
         while(self.currentToken.type in (TokenType.INT, TokenType.REAL)):
-            result.append(self.var_decl())
+            result.extend(self.var_decl())
             self.eat(TokenType.SEMI)
         return result
 
@@ -93,14 +93,44 @@ class Parser():
         return res
 
     def compound_statement(self):
-        pass
+        statement_list = []
+        while(self.currentToken.type == TokenType.ID):
+            var = self.variable()
+            if(self.lex.currentChar == '('):
+                statement_list.append(self.function_call(var))
+                self.eat(TokenType.SEMI)
+            else:
+                statement_list.append(self.assign(var))
+        return statement_list
 
-    def assign(self):
-        left = self.variable()
+
+    def assign(self,var):
+        # left = self.variable()
         self.eat(TokenType.EQUAL)
         right = self.expr()
         self.eat(TokenType.SEMI)
-        return Assign(left, right)
+        return Assign(var, right)
+
+    def function_call(self,function_name):
+        self.eat(TokenType.LPAREN)
+        params = self.real_params()
+        self.eat(TokenType.RPAREN)
+        return Function_call(function_name,params)
+
+    def real_params(self):
+        params = [self.variable()]
+        while(self.currentToken.type == TokenType.COMMA):
+            self.eat(TokenType.COMMA)
+            params.append(self.variable())
+
+    def if_decl(self):
+        pass
+
+    def for_loop(self):
+        pass
+
+    def while_loop(self):
+        pass
 
     def expr(self):
         node = self.term()
@@ -114,7 +144,7 @@ class Parser():
         return node
 
     def term(self):
-        node = self.paren()
+        node = self.factor()
         while(self.currentToken.type in (TokenType.MULIT, TokenType.DIVES, TokenType.MOD)):
             op = self.currentToken
             if(op.type == TokenType.MULIT):
@@ -123,10 +153,10 @@ class Parser():
                 self.eat(TokenType.DIVES)
             else:
                 self.eat(TokenType.MOD)
-            node = BinOp(node,self.paren(),op)
+            node = BinOp(node,self.factor(),op)
         return node
 
-    def paren(self):
+    def factor(self):
         node = None
         if(self.currentToken.type == TokenType.LPAREN):
             self.eat(TokenType.LPAREN)
