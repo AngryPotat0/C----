@@ -103,7 +103,6 @@ class Parser():
                 statement_list.append(self.assign(var))
         return statement_list
 
-
     def assign(self,var):
         # left = self.variable()
         self.eat(TokenType.EQUAL)

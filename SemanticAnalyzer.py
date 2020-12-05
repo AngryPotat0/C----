@@ -1,16 +1,10 @@
 from Token import*
 from AST import*
+from SymbolTable import*
 
-class Interpreter():
+class SemanticAnalyzer():
     def __init__(self,ast):
         self.ast = ast
-        self.calcu = {
-            '+':    lambda a,b: a + b,
-            '-':    lambda a,b: a - b,
-            '*':    lambda a,b: a * b,
-            '/':    lambda a,b: a / b,
-            '%':    lambda a,b: a % b
-        }
         self.visiter = {
             'Program':      self.visit_Program,
             'Function':     self.visit_Function,
@@ -25,10 +19,7 @@ class Interpreter():
             'UnaryOp':      self.visit_UnaryOp,
             'Num':          self.visit_Num,
         }
-    
-    def calculate(self,a,b,op):
-        return self.calcu[op](a,b)
-    
+
     def visit(self,node):
         return self.visiter[type(node).__name__](node)
 
@@ -60,16 +51,13 @@ class Interpreter():
         pass
 
     def visit_BinOp(self, node):
-        return self.calcu[node.op.value](self.visit(node.left),self.visit(node.right))
+        pass
 
     def visit_UnaryOp(self, node):
-        if(node.op.value == '-'):
-            return -(self.visit(node.expr))
-        elif(node.op.value == '+'):
-            return +(self.visit(node.expr))
+        pass
 
     def visit_Num(self, node):
-        return node.value
+        pass
     
     def run(self):
-        return self.visit(self.ast)
+        pass
