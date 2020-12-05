@@ -31,7 +31,7 @@ class VarSymbol(object):
 class FunctionSymbol(Symbol):
     def __init__(self,name,type,params=None):
         super().__init__(name,type)
-        self.params = params
+        self.params = params if params != None else []
 
     def __str__(self):
         return '<{class_name}(name={name}, parameters={params})>'.format(
@@ -42,4 +42,40 @@ class FunctionSymbol(Symbol):
     __repr__ = __str__
 
 class SymbolTable():
-    pass
+    def __init__(self,scope_name,scope_level,enclosing_scope):
+        self.scope = dict()
+        self.scope_name = scope_name
+        self.scope_level = scope_level
+        self.enclosing_scope = enclosing_scope
+        self.__init__builtins()
+
+    def __init__builtins(self):
+        self.insert(BuildInSymbol('INT'))
+        self.insert(BuildInSymbol('REAL'))
+
+    def insert(self,symbol):
+        self.scope[symbol.name] = symbol
+
+    def lookup(self,symbol_name):
+        return self.scope[symbol_name] if symbol_name in self.scope else None
+
+    def __str__(self):
+        h1 = 'SCOPE (SCOPED SYMBOL TABLE)'
+        lines = ['\n', h1, '=' * len(h1)]
+        for header_name, header_value in (
+            ('Scope name', self.scope_name),
+            ('Scope level', self.scope_level),
+            ('Enclosing scope', self.enclosing_scope.scope_name if self.enclosing_scope != None else None)
+        ):
+            lines.append('%-15s: %s' % (header_name, header_value))
+        h2 = 'Scope (Scoped symbol table) contents'
+        lines.extend([h2, '-' * len(h2)])
+        lines.extend(
+            ('%7s: %r' % (key, value))
+            for key, value in self.symbols.items()
+        )
+        lines.append('\n')
+        s = '\n'.join(lines)
+        return s
+
+    __repr__ = __str__
