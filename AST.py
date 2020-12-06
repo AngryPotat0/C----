@@ -7,6 +7,7 @@ class Program(AST):
 
 class Function(AST):
     def __init__(self,type, name, params, body):
+        self.type = type
         self.name = name
         self.params = params
         self.body = body
@@ -19,7 +20,7 @@ class Param(AST):
 class Code_Block(AST):
     def __init__(self,declarations,compound_statement):
         self.declarations = declarations
-        self.compound_statement = compound_statement
+        self.compound_statement = compound_statement#FIXME:Do we need to create a Compound node for AST?
 
 class Type(AST):
     def __init__(self,token):

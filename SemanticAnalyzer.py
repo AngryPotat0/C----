@@ -5,6 +5,7 @@ from SymbolTable import*
 class SemanticAnalyzer():
     def __init__(self,ast):
         self.ast = ast
+        self.scope = SymbolTable('outer', 0, None)
         self.visiter = {
             'Program':      self.visit_Program,
             'Function':     self.visit_Function,
@@ -23,31 +24,32 @@ class SemanticAnalyzer():
     def visit(self,node):
         return self.visiter[type(node).__name__](node)
 
-    def visit_Program(self):
+    def visit_Program(self,node):
+        for function in node.function_list:
+            self.visit(function)
+
+    def visit_Function(self,node):
         pass
 
-    def visit_Function(self):
+    def visit_Param(self,node):
         pass
 
-    def visit_Param(self):
+    def visit_Code_Block(self,node):
         pass
 
-    def visit_Code_Block(self):
+    def visit_Type(self,node):
         pass
 
-    def visit_Type(self):
+    def visit_Var(self,node):
         pass
 
-    def visit_Var(self):
+    def visit_Var_decl(self,node):
         pass
 
-    def visit_Var_decl(self):
+    def Assign(self,node):
         pass
 
-    def Assign(self):
-        pass
-
-    def visit_Function_call(self):
+    def visit_Function_call(self,node):
         pass
 
     def visit_BinOp(self, node):
@@ -57,7 +59,4 @@ class SemanticAnalyzer():
         pass
 
     def visit_Num(self, node):
-        pass
-    
-    def run(self):
         pass

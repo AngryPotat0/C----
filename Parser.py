@@ -112,15 +112,28 @@ class Parser():
 
     def function_call(self,function_name):
         self.eat(TokenType.LPAREN)
-        params = self.real_params()
+        params = self.real_param_list()
         self.eat(TokenType.RPAREN)
         return Function_call(function_name,params)
 
-    def real_params(self):
-        params = [self.variable()]
+    def real_param_list(self):
+        params = [self.real_param()]
         while(self.currentToken.type == TokenType.COMMA):
             self.eat(TokenType.COMMA)
-            params.append(self.variable())
+            params.append(self.real_param())
+
+    def real_param(self):
+        if(self.currentToken.type == TokenType.ID):
+            var = self.variable()
+            if(self.lex.currentChar == '('):
+                return function_call(var.value)
+            return var
+        token = self.currentToken
+        if(token.type == TokenType.INTEGER_CONST):
+            self.eat(TokenType.INTEGER_CONST)
+        else:
+            self.eat(TokenType.REAL_CONST)
+        return Num(token)
 
     def if_decl(self):
         pass
@@ -156,7 +169,6 @@ class Parser():
         return node
 
     def factor(self):
-        node = None
         if(self.currentToken.type == TokenType.LPAREN):
             self.eat(TokenType.LPAREN)
             node = self.expr()
@@ -169,10 +181,15 @@ class Parser():
                 self.eat(TokenType.MINUS)
             expr = self.expr()
             node = UnaryOp(expr, op)
+        elif(self.type == TokenType.ID):
+            var = self.variable()
+            # if(self.lex.currentChar == '('):
+            #     return self.function_call(var)
+            return var
         else:
             node = Num(self.currentToken)
             if(self.currentToken.type == TokenType.INTEGER_CONST):
                 self.eat(TokenType.INTEGER_CONST)
             else:
                 self.eat(TokenType.REAL_CONST)
-        return node
+        self.error()
