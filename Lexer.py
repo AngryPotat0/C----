@@ -4,6 +4,8 @@ class Lexer():
     def __init__(self,text):
         self.text = text
         self.pos = 0
+        self.column = 1
+        self.lineno = 1
         self.currentChar = self.text[self.pos]
         self.reserved_keywords = reserved_keywords()
     
@@ -12,6 +14,7 @@ class Lexer():
         if(self.pos >= len(self.text)):
             self.currentChar = None
             return
+        self.column += 1
         self.currentChar = self.text[self.pos]
     
     def peek(self):
@@ -44,16 +47,21 @@ class Lexer():
             result += self.currentChar
             self.advance()
         if(result in self.reserved_keywords):
-            return self.reserved_keywords[result]
+            return Token(self.reserved_keywords[result],result)
         return Token(TokenType.ID, result)
 
     def error(self):
-        raise Exception('Unexpectde char')
+        raise Exception('Unexpectde char At {line}:{column}'.format(line=self.lineno,column=self.column))
     
     def get_next_token(self):
         while(True):
             if(self.currentChar == None):
                 return Token(TokenType.EOF,None)
+            if(self.currentChar == '\n'):
+                self.lineno += 1
+                self.column = 1
+                self.advance()
+                continue
             if(self.currentChar == ' '):
                 self.skip_whitespace()
                 continue

@@ -12,6 +12,7 @@ class TokenType(Enum):
     EQUAL =             '='
     GREATE =            '>'
     LESS =              '<'
+    COMMA =             ','
     SEMI =              ';'
     BEQUAL =            '=='
     GE =                '>='
@@ -19,12 +20,12 @@ class TokenType(Enum):
     INTEGER_CONST =     'INTEGER_CONST'
     REAL_CONST =        'REAL_CONST'
     ID =                'ID'
-    MAIN =              'MAIN'
-    INT =               'INT'
-    REAL =              'REAL'
-    IF =                'IF'
-    FOR =               'FOR'
-    WHILE =             'WHILE'
+    #MAIN =              'main'#FIXME:
+    INT =               'int'
+    REAL =              'real'
+    IF =                'if'
+    FOR =               'for'
+    WHILE =             'while'
     EOF =               'EOF'
 
 class Token():
@@ -36,12 +37,10 @@ class Token():
 
 def reserved_keywords():
         token_list = list(TokenType)
-        print(token_list)
-        start = token_list.index(TokenType.MAIN)
+        start = token_list.index(TokenType.INT)
         end = token_list.index(TokenType.EOF)
         reserved_keywords = {
             token_type.value : token_type
             for token_type in token_list[start:end]
         }
-        print(reserved_keywords)
         return reserved_keywords

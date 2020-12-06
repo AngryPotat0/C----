@@ -2,8 +2,8 @@ class AST():
     pass
 
 class Program(AST):
-    def __init__(self,functions_list):
-        self.functions_list = functions_list
+    def __init__(self,function_list):
+        self.function_list = function_list
 
 class Function(AST):
     def __init__(self,type, name, params, body):
@@ -33,7 +33,7 @@ class Var(AST):
         self.value = token.value
 
 class Var_decl(AST):
-    def __init__(self,var_name, type_node):
+    def __init__(self,var_node, type_node):
         self.var_node = var_node
         self.type_node = type_node
 

@@ -2,6 +2,7 @@ from Lexer import*
 from Parser import*
 from Interpreter import*
 from Token import*
+from test import*
 def main():
     # reserved_keywords()
     text = ""
@@ -14,7 +15,9 @@ def main():
     file.close()
     lex = Lexer(text)
     parser = Parser(lex)
-    interpreter = Interpreter(parser.parser())
-    print(interpreter.run())
+    # interpreter = Interpreter(parser.parser())
+    # print(interpreter.run())
+    test = Test(parser.parser())
+    test.run()
 
 main()

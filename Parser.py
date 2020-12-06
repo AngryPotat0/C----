@@ -21,31 +21,33 @@ class Parser():
     def program(self):
         functions_list = []
         while(self.currentToken.type != TokenType.EOF):
-            functions_list.append(self.fuction_decl())
+            functions_list.append(self.function_decl())
         # main_function = [fun for fun in functions_list if fun.name == 'main']
         # if(main_function == []):
         #     self.error()
         return Program(functions_list)
 
     def function_decl(self):
-        func_type = self.type_spec()
-        func_name = self.variable().var_name
+        func_type = self.type_spec().value
+        func_name = self.variable().value
         func_params = self.params()
         func_body = self.code_block()
         return Function(func_type, func_name, func_params, func_body)
 
     def params(self):
-        self.eat(TokenType.LPAREN)
         result = []
+        self.eat(TokenType.LPAREN)
+        if(self.currentToken.type == TokenType.RPAREN):
+            self.eat(TokenType.RPAREN)
+            return result
         while(True):
             param_type = self.type_spec()
-            # param = self.currentToken.value
-            # self.eat(TokenType.ID)#FIXME:
             param = self.variable()
             result.append(Param(param,param_type))
             if(self.currentToken.type == TokenType.RPAREN):
                 break
             self.eat(TokenType.COMMA)
+        self.eat(TokenType.RPAREN)
         return result
 
     def code_block(self):
@@ -54,7 +56,7 @@ class Parser():
         declarations = self.declarations()
         compound_statement = self.compound_statement()
         self.eat(TokenType.RBRACE)
-        return Code_Block(declarations,combound_statement)
+        return Code_Block(declarations,compound_statement)
 
     def declarations(self):
         result = []
@@ -181,15 +183,15 @@ class Parser():
                 self.eat(TokenType.MINUS)
             expr = self.expr()
             node = UnaryOp(expr, op)
-        elif(self.type == TokenType.ID):
-            var = self.variable()
+        elif(self.currentToken.type == TokenType.ID):
+            node = self.variable()
             # if(self.lex.currentChar == '('):
             #     return self.function_call(var)
-            return var
+            # return var
         else:
             node = Num(self.currentToken)
             if(self.currentToken.type == TokenType.INTEGER_CONST):
                 self.eat(TokenType.INTEGER_CONST)
             else:
                 self.eat(TokenType.REAL_CONST)
-        self.error()
+        return node
