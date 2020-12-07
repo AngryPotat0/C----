@@ -102,12 +102,21 @@ class Parser():
 
     def compound_statement(self):#FIXME:
         statement_list = []
-        while(self.currentToken.type == TokenType.ID):
-            if(self.lex.currentChar == '('):
-                statement_list.append(self.function_call())#????????????????????????????
-                self.eat(TokenType.SEMI)
-            else:
-                statement_list.append(self.assign())
+        while(self.currentToken.type in (TokenType.ID, TokenType.RETURN, TokenType.IF, TokenType.WHILE, TokenType.FOR)):
+            if(self.currentToken.type == TokenType.ID):
+                if(self.lex.currentChar == '('):
+                    statement_list.append(self.function_call())#????????????????????????????
+                    self.eat(TokenType.SEMI)
+                else:
+                    statement_list.append(self.assign())
+            elif(self.currentToken.type == TokenType.RETURN):
+                statement_list.append(self.return_decl())
+            elif(self.currentToken.type == TokenType.IF):
+                statement_list.append(self.if_decl())
+            elif(self.currentToken.type == TokenType.WHILE):
+                statement_list.append(self.while_loop())
+            elif(self.currentToken.type == TokenType.FOR):
+                statement_list.append(self.for_loop())
         return statement_list
 
     def assign(self):

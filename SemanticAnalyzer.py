@@ -19,6 +19,10 @@ class SemanticAnalyzer():
             'BinOp':        self.visit_BinOp,
             'UnaryOp':      self.visit_UnaryOp,
             'Num':          self.visit_Num,
+            'Return':       self.visit_Return,
+            'IF':           self.visit_IF,
+            'WHILE':        self.visit_WHILE,
+            'FOR':          self.visit_FOR,
         }
 
     def visit(self,node):
@@ -59,4 +63,16 @@ class SemanticAnalyzer():
         pass
 
     def visit_Num(self, node):
+        pass
+
+    def visit_Return(self,node):
+        pass
+
+    def visit_IF(self,node):
+        pass
+
+    def visit_WHILE(self,node):
+        pass
+
+    def visit_FOR(self,node):
         pass

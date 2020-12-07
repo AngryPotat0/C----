@@ -5,7 +5,7 @@ from SymbolTable import*
 class Test():
     def __init__(self,ast):
         self.ast = ast
-        self.visiter = {
+                self.visiter = {
             'Program':      self.visit_Program,
             'Function':     self.visit_Function,
             'Param':        self.visit_Param,
@@ -18,6 +18,10 @@ class Test():
             'BinOp':        self.visit_BinOp,
             'UnaryOp':      self.visit_UnaryOp,
             'Num':          self.visit_Num,
+            'Return':       self.visit_Return,
+            'IF':           self.visit_IF,
+            'WHILE':        self.visit_WHILE,
+            'FOR':          self.visit_FOR,
         }
     
     def run(self):
@@ -77,3 +81,15 @@ class Test():
 
     def visit_Num(self, node):
         return node.value
+
+    def visit_Return(self,node):
+        pass
+
+    def visit_IF(self,node):
+        pass
+
+    def visit_WHILE(self,node):
+        pass
+
+    def visit_FOR(self,node):
+        pass
