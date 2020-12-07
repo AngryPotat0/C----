@@ -2,7 +2,8 @@ int main()
 {
     int a,b,c;
     a = 5;
-    b = a + 2 * (45 + a);
+    b = a + 2 * (45 + func(5,2,2));
+    func(5,2,3);
 }
 
 int func(int a,int b,int c)

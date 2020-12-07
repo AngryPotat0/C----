@@ -47,27 +47,33 @@ class Test():
     def visit_Code_Block(self,node):
         for decl in node.declarations:
             self.visit(decl)
+        for statement in node.compound_statement:
+            self.visit(statement)
 
     def visit_Type(self,node):
         pass
 
     def visit_Var(self,node):
-        pass
+        return node.value
 
     def visit_Var_decl(self,node):
         print("Var_decl: name: {name},type: {type}".format(name = node.var_node.value, type = node.type_node.value))
 
     def visit_Assign(self,node):
-        pass
+        expr = self.visit(node.right)
+        print("Assign: {left}={right}".format(left=node.left.value,right=expr))
 
     def visit_Function_call(self,node):
-        pass
+        print('Call function:{name}'.format(name=node.function_name))
+        return 'Call function:{name}'.format(name=node.function_name)
 
     def visit_BinOp(self, node):
-        pass
+        return '{left}{op}{right}'.format(
+            left=self.visit(node.left),op = node.op.value,right=self.visit(node.right)
+            )
 
     def visit_UnaryOp(self, node):
         pass
 
     def visit_Num(self, node):
-        pass
+        return node.value

@@ -94,48 +94,35 @@ class Parser():
         res = Var(var)
         return res
 
-    def compound_statement(self):
+    def compound_statement(self):#FIXME:
         statement_list = []
         while(self.currentToken.type == TokenType.ID):
-            var = self.variable()
             if(self.lex.currentChar == '('):
-                statement_list.append(self.function_call(var))
+                statement_list.append(self.function_call())#????????????????????????????
                 self.eat(TokenType.SEMI)
             else:
-                statement_list.append(self.assign(var))
+                statement_list.append(self.assign())
         return statement_list
 
-    def assign(self,var):
-        # left = self.variable()
+    def assign(self):
+        left = self.variable()
         self.eat(TokenType.EQUAL)
         right = self.expr()
         self.eat(TokenType.SEMI)
-        return Assign(var, right)
+        return Assign(left, right)
 
-    def function_call(self,function_name):
+    def function_call(self):
+        function_name = self.variable().value
         self.eat(TokenType.LPAREN)
         params = self.real_param_list()
         self.eat(TokenType.RPAREN)
         return Function_call(function_name,params)
 
     def real_param_list(self):
-        params = [self.real_param()]
+        params = [self.expr()]
         while(self.currentToken.type == TokenType.COMMA):
             self.eat(TokenType.COMMA)
-            params.append(self.real_param())
-
-    def real_param(self):
-        if(self.currentToken.type == TokenType.ID):
-            var = self.variable()
-            if(self.lex.currentChar == '('):
-                return function_call(var.value)
-            return var
-        token = self.currentToken
-        if(token.type == TokenType.INTEGER_CONST):
-            self.eat(TokenType.INTEGER_CONST)
-        else:
-            self.eat(TokenType.REAL_CONST)
-        return Num(token)
+            params.append(self.expr())
 
     def if_decl(self):
         pass
@@ -175,6 +162,7 @@ class Parser():
             self.eat(TokenType.LPAREN)
             node = self.expr()
             self.eat(TokenType.RPAREN)
+            return node
         elif(self.currentToken.type in (TokenType.PLUS, TokenType.MINUS)):
             op = self.currentToken
             if(op.type == TokenType.PLUS):
@@ -183,15 +171,17 @@ class Parser():
                 self.eat(TokenType.MINUS)
             expr = self.expr()
             node = UnaryOp(expr, op)
+            return node
         elif(self.currentToken.type == TokenType.ID):
+            if(self.lex.currentChar == '('):
+                return self.function_call()#?????????????????????????
             node = self.variable()
-            # if(self.lex.currentChar == '('):
-            #     return self.function_call(var)
-            # return var
+            return node
         else:
             node = Num(self.currentToken)
             if(self.currentToken.type == TokenType.INTEGER_CONST):
                 self.eat(TokenType.INTEGER_CONST)
             else:
                 self.eat(TokenType.REAL_CONST)
-        return node
+            return node
+        self.error()
