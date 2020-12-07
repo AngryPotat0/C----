@@ -12,6 +12,10 @@ class Function(AST):
         self.params = params
         self.body = body
 
+class Return(AST):
+    def __init__(self,return_expr):
+        self.return_expr = return_expr
+
 class Param(AST):
     def __init__(self,var_node, type_node):
         self.var_node = var_node
@@ -51,7 +55,9 @@ class If(AST):
     pass
 
 class While(AST):
-    pass
+    def __init__(self,expr,block):
+        self.expr = expr
+        self.block = block
 
 class For(AST):
     pass

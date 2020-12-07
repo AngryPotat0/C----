@@ -23,9 +23,12 @@ class TokenType(Enum):
     #MAIN =              'main'#FIXME:
     INT =               'int'
     REAL =              'real'
+    CHAR =              'char'
+    VOID =              'void'
     IF =                'if'
     FOR =               'for'
     WHILE =             'while'
+    RETURN =            'return'
     EOF =               'EOF'
 
 class Token():

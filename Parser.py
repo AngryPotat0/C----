@@ -34,6 +34,12 @@ class Parser():
         func_body = self.code_block()
         return Function(func_type, func_name, func_params, func_body)
 
+    def return_decl(self):
+        self.eat(TokenType.RETURN)
+        expr = self.expr()
+        self.eat(TokenType.SEMI)
+        return Return(expr)
+
     def params(self):
         result = []
         self.eat(TokenType.LPAREN)
@@ -131,7 +137,12 @@ class Parser():
         pass
 
     def while_loop(self):
-        pass
+        self.eat(TokenType.WHILE)
+        self.eat(TokenType.LPAREN)
+        expr = self.expr()
+        self.eat(TokenType.RPAREN)
+        block = self.code_block()
+        return While(expr,block)
 
     def expr(self):
         node = self.term()
