@@ -49,7 +49,7 @@ class Assign(AST):
 class Function_call(AST):
     def __init__(self,function_name,real_params):
         self.function_name = function_name
-        self.real_params = real_params
+        self.real_params = real_params#each param is a expr
 
 class If(AST):
     pass

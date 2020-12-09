@@ -52,12 +52,21 @@ class SymbolTable():
     def __init__builtins(self):
         self.insert(BuildInSymbol('INT'))
         self.insert(BuildInSymbol('REAL'))
+    
+    def error(self, msg):
+        raise Exception(msg)
 
     def insert(self,symbol):
-        self.scope[symbol.name] = symbol
+        name = symbol.name
+        if(name in self.scope):
+            self.error('Duplicate identifier is found')
+        self.scope[name] = symbol
 
     def lookup(self,symbol_name):
-        return self.scope[symbol_name] if symbol_name in self.scope else None
+        # return self.scope[symbol_name] if symbol_name in self.scope else None
+        if(symbol_name in self.scope):
+            return self.scope[symbol_name]
+        self.error('Symbol not found')
 
     def __str__(self):
         h1 = 'SCOPE (SCOPED SYMBOL TABLE)'

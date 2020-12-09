@@ -3,8 +3,9 @@ from AST import*
 from SymbolTable import*
 
 class SemanticAnalyzer():
-    def __init__(self,ast):
+    def __init__(self,ast,log):
         self.ast = ast
+        self.log = log
         self.scope = SymbolTable('outer', 0, None)
         self.visiter = {
             'Program':      self.visit_Program,
@@ -66,13 +67,13 @@ class SemanticAnalyzer():
 
     def visit_Var(self,node):
         var_name = node.vat_node.value
-        if(self.scope.lookup(var_name) == None):
-            self.error("Var not found")
+        # if(self.scope.lookup(var_name) == None):
+        #     self.error("Var not found")
 
     def visit_Var_decl(self,node):
         var_name = node.var_node.value
-        if(self.scope.lookup(var_name) != None):
-            self.error('Duplicate identifier')
+        # if(self.scope.lookup(var_name) != None):
+        #     self.error('Duplicate identifier')
         var_type = self.scope.lookup(node.type_node.value)
         var_symbol = VarSymbol(var_name,var_type)
         self.scope.insert(var_symbol)
