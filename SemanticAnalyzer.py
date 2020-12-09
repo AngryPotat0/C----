@@ -25,6 +25,9 @@ class SemanticAnalyzer():
             'FOR':          self.visit_FOR,
         }
 
+    def error(self,msg):
+        raise Exception(msg)
+
     def visit(self,node):
         return self.visiter[type(node).__name__](node)
 
@@ -33,31 +36,57 @@ class SemanticAnalyzer():
             self.visit(function)
 
     def visit_Function(self,node):
-        pass
+        function_name = node.name
+        function_type = node.type
+        params = node.params
+        functionSymbol = FunctionSymbol(function_name, function_type)
+        function_scope = SymbolTable(function_name, self.scope.scope_level + 1, self.scope)
+        self.scope.insert(functionSymbol)
+        self.scope = function_scope
+        for param in params:
+            param_name = param.var_node.value
+            param_type = self.scope.lookup(param.type_node.value)
+            varSymbol = VarSymbol(param_name, param_type)
+            functionSymbol.params.append(varSymbol)
+            self.scope.insert(varSymbol)
+        self.visit(node.body)
+        self.scope = self.scope.enclosing_scope
 
     def visit_Param(self,node):
         pass
 
     def visit_Code_Block(self,node):
-        pass
+        for declaration in node.declarations:
+            self.visit(declaration)
+        for statement in node.compound_statement:
+            self.visit(statement)
 
     def visit_Type(self,node):
         pass
 
     def visit_Var(self,node):
-        pass
+        var_name = node.vat_node.value
+        if(self.scope.lookup(var_name) == None):
+            self.error("Var not found")
 
     def visit_Var_decl(self,node):
-        pass
+        var_name = node.var_node.value
+        if(self.scope.lookup(var_name) != None):
+            self.error('Duplicate identifier')
+        var_type = self.scope.lookup(node.type_node.value)
+        var_symbol = VarSymbol(var_name,var_type)
+        self.scope.insert(var_symbol)
 
     def Assign(self,node):
-        pass
+        self.visit(node.left)
+        self.visit(node.right)
 
     def visit_Function_call(self,node):
         pass
 
     def visit_BinOp(self, node):
-        pass
+        self.visit(node.left)
+        self.visit(node.right)
 
     def visit_UnaryOp(self, node):
         pass

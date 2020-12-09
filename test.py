@@ -5,7 +5,7 @@ from SymbolTable import*
 class Test():
     def __init__(self,ast):
         self.ast = ast
-                self.visiter = {
+        self.visiter = {
             'Program':      self.visit_Program,
             'Function':     self.visit_Function,
             'Param':        self.visit_Param,
