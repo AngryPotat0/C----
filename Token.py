@@ -24,6 +24,7 @@ class TokenType(Enum):
     INT =               'int'
     REAL =              'real'
     CHAR =              'char'
+    BOOL =              'bool'
     VOID =              'void'
     IF =                'if'
     FOR =               'for'

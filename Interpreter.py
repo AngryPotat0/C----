@@ -95,6 +95,18 @@ class Interpreter():
 
     def visit_Num(self, node):
         return node.value
+
+    def visit_Return(self, node):
+        pass
+
+    def visit_IF(self, node):
+        pass
+
+    def visit_WHILE(self, node):
+        pass
+
+    def visit_FOR(self, node):
+        pass
     
     def run(self):
         return self.visit(self.ast)
