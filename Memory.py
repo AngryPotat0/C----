@@ -11,6 +11,12 @@ class Frame():
     def get_value(self,name):
         return self.memory[name] if name in self.memory else None
 
+    def __setitem__(self,name,value):
+        self.memory[name] = value
+
+    def __getitem__(self,name):
+        return self.memory[name]
+
 class CallStack():
     def __init__(self):
         self.stack = []
