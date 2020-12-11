@@ -29,6 +29,9 @@ class SemanticAnalyzer():
     def error(self,msg):
         raise Exception(msg)
 
+    def run(self):
+        self.visit(self.ast)
+
     def visit(self,node):
         return self.visiter[type(node).__name__](node)
 
@@ -78,7 +81,7 @@ class SemanticAnalyzer():
         var_symbol = VarSymbol(var_name,var_type)
         self.scope.insert(var_symbol)
 
-    def Assign(self,node):
+    def visit_Assign(self,node):
         self.visit(node.left)
         self.visit(node.right)
 

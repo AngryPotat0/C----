@@ -3,6 +3,7 @@ from Parser import*
 from Interpreter import*
 from Token import*
 from test import*
+from SemanticAnalyzer import*
 def main():
     # reserved_keywords()
     text = ""
@@ -15,7 +16,10 @@ def main():
     file.close()
     lex = Lexer(text)
     parser = Parser(lex)
-    interpreter = Interpreter(parser.parser())
+    ast = parser.parser()
+    # seman = SemanticAnalyzer(ast,1)
+    # seman.run()
+    interpreter = Interpreter(ast)
     interpreter.run()
     # test = Test(parser.parser())
     # test.run()
