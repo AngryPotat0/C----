@@ -66,7 +66,7 @@ class Parser():
 
     def declarations(self):
         result = []
-        while(self.currentToken.type in (TokenType.INT, TokenType.REAL)):
+        while(self.currentToken.type in (TokenType.INT, TokenType.REAL, TokenType.CHAR, TokenType.BOOL)):
             result.extend(self.var_decl())
             self.eat(TokenType.SEMI)
         return result
@@ -128,8 +128,10 @@ class Parser():
 
     def function_call(self):
         function_name = self.variable().value
+        params = []
         self.eat(TokenType.LPAREN)
-        params = self.real_param_list()
+        if(self.currentToken.type != TokenType.RPAREN):
+            params = self.real_param_list()
         self.eat(TokenType.RPAREN)
         return Function_call(function_name,params)
 
@@ -138,6 +140,7 @@ class Parser():
         while(self.currentToken.type == TokenType.COMMA):
             self.eat(TokenType.COMMA)
             params.append(self.expr())
+        return params
 
     def if_decl(self):
         pass

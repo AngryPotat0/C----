@@ -15,9 +15,9 @@ def main():
     file.close()
     lex = Lexer(text)
     parser = Parser(lex)
-    # interpreter = Interpreter(parser.parser())
-    # print(interpreter.run())
-    test = Test(parser.parser())
-    test.run()
+    interpreter = Interpreter(parser.parser())
+    interpreter.run()
+    # test = Test(parser.parser())
+    # test.run()
 
 main()

@@ -34,6 +34,14 @@ class Interpreter():
     
     def calculate(self,a,b,op):
         return self.calcu[op](a,b)
+
+    def visit_print(self,actual_params):
+        for param in actual_params:
+            print(self.visit(param))
+
+    def visit_input(self):#FIXME:
+        temp = input()
+        return int(temp)
     
     def visit(self,node):
         return self.visiter[type(node).__name__](node)
@@ -44,7 +52,8 @@ class Interpreter():
             main_function = main_function[0]
         else:
             raise Exception('Main function cannot found')
-        self.visit(main_function,[])
+        status = self.visit_Function(main_function,[])
+        return status
 
     def visit_Function(self, node, actual_params):
         self.memory.push(Frame(node.name,2))
@@ -52,7 +61,7 @@ class Interpreter():
         for name, value in zip(node.params, actual_params):
             current_frame.set_value(name.var_node.value, self.visit(value))
         return_value = self.visit(node.body)#FIXME:
-        self.pop()
+        self.memory.pop()
         return return_value
 
     def visit_Param(self, node):
@@ -63,6 +72,8 @@ class Interpreter():
         for decl in node.declarations:
             current_frame.set_value(decl.var_node.value,0)
         for statement in node.compound_statement:
+            if(isinstance(statement,Return)):
+                return self.visit_Return(statement)
             self.visit(statement)
             
 
@@ -70,19 +81,24 @@ class Interpreter():
         pass
 
     def visit_Var(self, node):
-        return self.memory.peek().get_value(node.var_node.name)
+        return self.memory.peek().get_value(node.value)
 
     def visit_Var_decl(self, node):
         pass
 
-    def Assign(self, node):
-        left = node.left.var_node.value
+    def visit_Assign(self, node):
+        left = node.left.value
         right = self.visit(node.right)
         self.memory.peek().set_value(left,right)
 
     def visit_Function_call(self, node):
         actual_params = [param for param in node.real_params]
-        return self.visit_function(func, actual_params)#FIXME:
+        if(node.function_name == 'print'):
+            self.visit_print(actual_params)
+        elif(node.function_name == 'input'):
+            return self.visit_input()
+        else:
+            return self.visit_function(func, actual_params)#FIXME:
 
     def visit_BinOp(self, node):
         return self.calcu[node.op.value](self.visit(node.left),self.visit(node.right))
@@ -97,7 +113,7 @@ class Interpreter():
         return node.value
 
     def visit_Return(self, node):
-        pass
+        return self.visit(node.return_expr)
 
     def visit_IF(self, node):
         pass
@@ -109,4 +125,6 @@ class Interpreter():
         pass
     
     def run(self):
-        return self.visit(self.ast)
+        status = self.visit(self.ast)
+        if(status != 0):
+            raise Exception('Program Error')
