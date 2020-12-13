@@ -21,9 +21,9 @@ class SemanticAnalyzer():
             'UnaryOp':      self.visit_UnaryOp,
             'Num':          self.visit_Num,
             'Return':       self.visit_Return,
-            'IF':           self.visit_IF,
-            'WHILE':        self.visit_WHILE,
-            'FOR':          self.visit_FOR,
+            'If':           self.visit_IF,
+            'While':        self.visit_WHILE,
+            'For':          self.visit_FOR,
         }
 
     def error(self,msg):
@@ -54,6 +54,7 @@ class SemanticAnalyzer():
             functionSymbol.params.append(varSymbol)
             self.scope.insert(varSymbol)
         self.visit(node.body)
+        print(self.scope)#FIXME: test code delete it
         self.scope = self.scope.enclosing_scope
 
     def visit_Param(self,node):
@@ -69,7 +70,7 @@ class SemanticAnalyzer():
         pass
 
     def visit_Var(self,node):
-        var_name = node.vat_node.value
+        var_name = node.value
         # if(self.scope.lookup(var_name) == None):
         #     self.error("Var not found")
 

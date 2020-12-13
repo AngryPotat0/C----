@@ -15,7 +15,7 @@ class BuildInSymbol(Symbol):
 
     __repr__ = __str__
 
-class VarSymbol(object):
+class VarSymbol(Symbol):
     def __init__(self,name,type):
         super().__init__(name,type)
 
@@ -50,8 +50,11 @@ class SymbolTable():
         self.__init__builtins()
 
     def __init__builtins(self):
-        self.insert(BuildInSymbol('INT'))
-        self.insert(BuildInSymbol('REAL'))
+        self.insert(BuildInSymbol('int'))
+        self.insert(BuildInSymbol('real'))
+        self.insert(BuildInSymbol('char'))
+        self.insert(BuildInSymbol('void'))
+        self.insert(BuildInSymbol('bool'))
     
     def error(self, msg):
         raise Exception(msg)
@@ -81,7 +84,7 @@ class SymbolTable():
         lines.extend([h2, '-' * len(h2)])
         lines.extend(
             ('%7s: %r' % (key, value))
-            for key, value in self.symbols.items()
+            for key, value in self.scope.items()
         )
         lines.append('\n')
         s = '\n'.join(lines)

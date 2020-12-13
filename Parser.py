@@ -89,6 +89,18 @@ class Parser():
             result = Type(self.currentToken)
             self.eat(TokenType.INT)
             return result
+        elif(self.currentToken.type == TokenType.CHAR):
+            result = Type(self.currentToken)
+            self.eat(TokenType.CHAR)
+            return result
+        elif(self.currentToken.type == TokenType.VOID):
+            result = Type(self.currentToken)
+            self.eat(TokenType.VOID)
+            return result
+        elif(self.currentToken.type == TokenType.BOOL):
+            result = Type(self.currentToken)
+            self.eat(TokenType.BOOL)
+            return result
         else:
             result = Type(self.currentToken)
             self.eat(TokenType.REAL)
@@ -142,11 +154,30 @@ class Parser():
             params.append(self.expr())
         return params
 
-    def if_decl(self):
-        pass
+    def if_decl(self):#FIXME:
+        self.eat(TokenType.IF)
+        self.eat(TokenType.LPAREN)
+        expr = self.expr()
+        self.eat(TokenType.RPAREN)
+        block = self.code_block()
+        return If(expr,block)
 
-    def for_loop(self):
-        pass
+    def for_loop(self):#FIXME:
+        self.eat(TokenType.FOR)
+        self.eat(TokenType.LPAREN)
+        assign = expr1 = expr2 = None
+        if(self.currentToken.type != TokenType.SEMI):
+            assign = self.assign()
+        self.eat(TokenType.SEMI)
+        if(self.currentToken.type != TokenType.SELF):
+            expr1 = self.expr()
+        self.eat(TokenType.SEMI)
+        if(self.currentToken.type != TokenType.SELF):
+            expr2 = self.expr()
+        self.eat(TokenType.SEMI)
+        self.eat(TokenType.RPAREN)
+        block = self.block()
+        return For(assign,expr1,expr2,block)
 
     def while_loop(self):
         self.eat(TokenType.WHILE)

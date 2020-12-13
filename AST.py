@@ -52,7 +52,9 @@ class Function_call(AST):
         self.real_params = real_params#each param is a expr
 
 class If(AST):
-    pass
+    def __init__(self,expr,block):
+        self.expr = expr
+        self.block = block
 
 class While(AST):
     def __init__(self,expr,block):
@@ -60,7 +62,11 @@ class While(AST):
         self.block = block
 
 class For(AST):
-    pass
+    def __init__(self,assign,expr1,expr2,block):
+        self.assign = assign
+        self.expr1 = expr1
+        self.expr2 = expr2
+        self.block = block
 
 class BinOp(AST):
     def __init__(self,left,right,op):
