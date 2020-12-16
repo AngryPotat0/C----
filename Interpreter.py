@@ -11,7 +11,7 @@ class Interpreter():
             '-':    lambda a,b: a - b,
             '*':    lambda a,b: a * b,
             '/':    lambda a,b: a / b,
-            '%':    lambda a,b: a % b
+            '%':    lambda a,b: a % b,
         }
         self.visiter = {
             'Program':      self.visit_Program,
@@ -27,9 +27,10 @@ class Interpreter():
             'UnaryOp':      self.visit_UnaryOp,
             'Num':          self.visit_Num,
             'Return':       self.visit_Return,
-            'IF':           self.visit_IF,
-            'WHILE':        self.visit_WHILE,
-            'FOR':          self.visit_FOR,
+            'If':           self.visit_If,
+            'While':        self.visit_While,
+            'For':          self.visit_For,
+            'Block':        self.visit_Block,
         }
     
     def calculate(self,a,b,op):
@@ -115,13 +116,16 @@ class Interpreter():
     def visit_Return(self, node):
         return self.visit(node.return_expr)
 
-    def visit_IF(self, node):
+    def visit_If(self, node):
         pass
 
-    def visit_WHILE(self, node):
+    def visit_While(self, node):
         pass
 
-    def visit_FOR(self, node):
+    def visit_For(self, node):
+        pass
+
+    def visit_Block(self, node):
         pass
     
     def run(self):

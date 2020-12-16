@@ -159,7 +159,7 @@ class Parser():
         self.eat(TokenType.LPAREN)
         expr = self.expr()
         self.eat(TokenType.RPAREN)
-        block = self.code_block()
+        block = self.block()
         return If(expr,block)
 
     def for_loop(self):#FIXME:
@@ -184,8 +184,14 @@ class Parser():
         self.eat(TokenType.LPAREN)
         expr = self.expr()
         self.eat(TokenType.RPAREN)
-        block = self.code_block()
+        block = self.block()
         return While(expr,block)
+
+    def block(self):
+        self.eat(TokenType.LBRACE)
+        compound_statement = self.compound_statement()
+        self.eat(TokenType.RBRACE)
+        return Block(compound_statement)
 
     def expr(self):
         node = self.term()

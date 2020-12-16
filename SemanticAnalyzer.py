@@ -21,9 +21,10 @@ class SemanticAnalyzer():
             'UnaryOp':      self.visit_UnaryOp,
             'Num':          self.visit_Num,
             'Return':       self.visit_Return,
-            'If':           self.visit_IF,
-            'While':        self.visit_WHILE,
-            'For':          self.visit_FOR,
+            'If':           self.visit_If,
+            'While':        self.visit_While,
+            'For':          self.visit_For,
+            'Block':        self.visit_Block,
         }
 
     def error(self,msg):
@@ -76,8 +77,6 @@ class SemanticAnalyzer():
 
     def visit_Var_decl(self,node):
         var_name = node.var_node.value
-        # if(self.scope.lookup(var_name) != None):
-        #     self.error('Duplicate identifier')
         var_type = self.scope.lookup(node.type_node.value)
         var_symbol = VarSymbol(var_name,var_type)
         self.scope.insert(var_symbol)
@@ -102,11 +101,14 @@ class SemanticAnalyzer():
     def visit_Return(self,node):
         pass
 
-    def visit_IF(self,node):
+    def visit_If(self,node):
         pass
 
-    def visit_WHILE(self,node):
+    def visit_While(self,node):
         pass
 
-    def visit_FOR(self,node):
+    def visit_For(self,node):
+        pass
+
+    def visit_Block(self, node):
         pass

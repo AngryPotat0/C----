@@ -68,6 +68,10 @@ class For(AST):
         self.expr2 = expr2
         self.block = block
 
+class Block(AST):
+    def __init__(self,compound_statement):
+        self.compound_statement = compound_statement
+
 class BinOp(AST):
     def __init__(self,left,right,op):
         self.left = left
