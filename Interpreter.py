@@ -12,6 +12,9 @@ class Interpreter():
             '*':    lambda a,b: a * b,
             '/':    lambda a,b: a / b,
             '%':    lambda a,b: a % b,
+            '&':    lambda a,b: a & b,
+            '|':    lambda a,b: a | b,
+            '^':    lambda a,b: a ^ b,
         }
         self.visiter = {
             'Program':      self.visit_Program,
@@ -102,6 +105,23 @@ class Interpreter():
             return self.visit_function(func, actual_params)#FIXME:
 
     def visit_BinOp(self, node):
+        op = node.op.value
+        if(op == '=='):
+            return self.visit(node.left) == self.visit(node.right)
+        elif(op == '!='):
+            return self.visit(node.left) != self.visit(node.right)
+        elif(op == '>'):
+            return self.visit(node.left) > self.visit(node.right)
+        elif(op == '<'):
+            return self.visit(node.left) < self.visit(node.right)
+        elif(op == '>='):
+            return self.visit(node.left) >= self.visit(node.right)
+        elif(op == '<='):
+            return self.visit(node.left) <= self.visit(node.right)
+        elif(op == '&&'):
+            return self.visit(node.left) and self.visit(node.right)
+        elif(op == '||'):
+            return self.visit(node.left) or self.visit(node.right)
         return self.calcu[node.op.value](self.visit(node.left),self.visit(node.right))
 
     def visit_UnaryOp(self, node):
@@ -109,6 +129,10 @@ class Interpreter():
             return -(self.visit(node.expr))
         elif(node.op.value == '+'):
             return +(self.visit(node.expr))
+        elif(node.op.value == '!'):
+           return not(self.visit(node.expr))
+        elif(node.op.value == '~'):
+            return ~(self.visit(node.expr))
 
     def visit_Num(self, node):
         return node.value
@@ -117,16 +141,19 @@ class Interpreter():
         return self.visit(node.return_expr)
 
     def visit_If(self, node):
-        pass
+        if(self.visit(node.expr)):
+            self.visit(node.block)
 
-    def visit_While(self, node):
-        pass
+    def visit_While(self, node):#TODO: break, continue
+        while(self.visit(node.expr)):
+            self.visit(node.block)
 
     def visit_For(self, node):
         pass
 
     def visit_Block(self, node):
-        pass
+        for statement in node.compound_statement:
+            self.visit(statement)
     
     def run(self):
         status = self.visit(self.ast)

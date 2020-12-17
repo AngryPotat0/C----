@@ -55,7 +55,7 @@ class SemanticAnalyzer():
             functionSymbol.params.append(varSymbol)
             self.scope.insert(varSymbol)
         self.visit(node.body)
-        print(self.scope)#FIXME: test code delete it
+        # print(self.scope)#FIXME: test code delete it
         self.scope = self.scope.enclosing_scope
 
     def visit_Param(self,node):

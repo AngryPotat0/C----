@@ -65,6 +65,10 @@ class Lexer():
             if(self.currentChar == ' '):
                 self.skip_whitespace()
                 continue
+            if(self.currentChar == '!' and self.peek() == '='):
+                self.advance()
+                self.advance()
+                return Token(TokenType.NEQUAL, '!=')
             if(self.currentChar == '=' and self.peek() == '='):
                 self.advance()
                 self.advance()
@@ -77,6 +81,14 @@ class Lexer():
                 self.advance()
                 self.advance()
                 return Token(TokenType.LE, '<=')
+            if(self.currentChar == '&' and self.peek() == '&'):
+                self.advance()
+                self.advance()
+                return Token(TokenType.BAND, '&&')
+            if(self.currentChar == '|' and self.peek() == '|'):
+                self.advance()
+                self.advance()
+                return Token(TokenType.BOR, '|')
             if(self.currentChar.isdigit()):
                 return self.number()
             if(self.currentChar.isalnum()):
