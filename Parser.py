@@ -19,13 +19,15 @@ class Parser():
         return self.program()
     
     def program(self):
-        functions_list = []
+        function_list = []
         while(self.currentToken.type != TokenType.EOF):
-            functions_list.append(self.function_decl())
+            function_list.append(self.function_decl())
+            # function = function_list[-1]
+            # print("function:{name}, type :{type}".format(name = function.name, type = function.type))
         # main_function = [fun for fun in functions_list if fun.name == 'main']
         # if(main_function == []):
         #     self.error()
-        return Program(functions_list)
+        return Program(function_list)
 
     def function_decl(self):
         func_type = self.type_spec().value
@@ -194,17 +196,68 @@ class Parser():
         return Block(compound_statement)
 
     def expr(self):
-        node = self.term()
+        node = self.level_2()
+        while(self.currentToken.type == TokenType.BOR):
+            op = self.currentToken
+            self.eat(TokenType.BOR)
+            node = BinOp(node, self.level_2(), op)
+        return node
+
+    def level_2(self):
+        node = self.level_3()
+        while(self.currentToken.type == TokenType.BAND):
+            op = self.currentToken
+            self.eat(TokenType.BAND)
+            node = BinOp(node, self.level_3(), op)
+        return node
+    
+    def level_3(self):
+        node = self.level_4()
+        while(self.currentToken.type == TokenType.OR):
+            op = self.currentToken
+            self.eat(TokenType.OR)
+            node = BinOp(node, self.level_4(), op)
+        return node
+
+    def level_4(self):
+        node = self.level_5()
+        while(self.currentToken.type == TokenType.XOR):
+            op = self.currentToken
+            self.eat(TokenType.XOR)
+            node = BinOp(node, self.level_5(), op)
+        return node
+
+    def level_5(self):
+        node = self.level_6()
+        while(self.currentToken.type == TokenType.AND):
+            op = self.currentToken
+            self.eat(TokenType.AND)
+            node = BinOp(node, self.level_6(), op)
+        return node
+
+    def level_6(self):
+        node = self.level_7()
+        op_list = [
+            TokenType.BEQUAL,TokenType.NEQUAL,TokenType.GREATE,TokenType.GE,TokenType.LESS,TokenType.LE
+        ]
+        if(self.currentToken.type in op_list):
+            op = self.currentToken
+            self.eat(op.type)#FIXME:
+            node = BinOp(node, self.level_7(), op)
+        return node
+
+    def level_7(self):
+        node = self.level_8()
         while(self.currentToken.type in (TokenType.PLUS, TokenType.MINUS)):
             op = self.currentToken
             if(op.type == TokenType.PLUS):
                 self.eat(TokenType.PLUS)
             else:
                 self.eat(TokenType.MINUS)
-            node = BinOp(node, self.term(), op)
+            node = BinOp(node, self.level_8(), op)
         return node
 
-    def term(self):
+    def level_8(self):
         node = self.factor()
         while(self.currentToken.type in (TokenType.MULIT, TokenType.DIVES, TokenType.MOD)):
             op = self.currentToken
@@ -216,6 +269,17 @@ class Parser():
                 self.eat(TokenType.MOD)
             node = BinOp(node,self.factor(),op)
         return node
+
+    # def level_9(self):
+    #     node = self.factor()
+    #     while(self.currentToken.type in (TokenType.NOT, TokenType.BNOT)):
+    #         op = self.currentToken
+    #         if(op.type == TokenType.NOT):
+    #             self.eat(TokenType.NOT)
+    #         else:
+    #             self.eat(TokenType.BNOT)
+    #         node = BinOp(node, self.factor(), op)
+    #     return node
 
     def factor(self):
         if(self.currentToken.type == TokenType.LPAREN):
@@ -229,6 +293,15 @@ class Parser():
                 self.eat(TokenType.PLUS)
             else:
                 self.eat(TokenType.MINUS)
+            expr = self.expr()
+            node = UnaryOp(expr, op)
+            return node
+        elif(self.currentToken.type in (TokenType.NOT, TokenType.BNOT)):
+            op = self.currentToken
+            if(op.type == TokenType.NOT):
+                self.eat(TokenType.NOT)
+            else:
+                self.eat(TokenType.BNOT)
             expr = self.expr()
             node = UnaryOp(expr, op)
             return node
