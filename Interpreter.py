@@ -96,8 +96,9 @@ class Interpreter():
         for statement in node.compound_statement:
             if(isinstance(statement,Return)):
                 return self.visit_Return(statement)
-            self.visit(statement)
-            
+            return_value = self.visit(statement)
+            if(return_value != None):
+                return return_value
 
     def visit_Type(self, node):
         pass
@@ -162,18 +163,29 @@ class Interpreter():
 
     def visit_If(self, node):
         if(self.visit(node.expr)):
-            self.visit(node.block)
+            return self.visit(node.block)
 
     def visit_While(self, node):#TODO: break, continue
+        compound_statement = node.block.compound_statement
         while(self.visit(node.expr)):
-            self.visit(node.block)
+            # self.visit(node.block)
+            for statement in compound_statement:
+                if(isinstance(statement,Return)):
+                    return self.visit_Return(statement)
+                return_value = self.visit(statement)
+                if(return_value != None):
+                    return return_value
 
     def visit_For(self, node):
         pass
 
     def visit_Block(self, node):
         for statement in node.compound_statement:
-            self.visit(statement)
+            if(isinstance(statement,Return)):
+                return self.visit_Return(statement)
+            return_value = self.visit(statement)
+            if(return_value != None):
+                return return_value
     
     def run(self):
         status = self.visit(self.ast)
