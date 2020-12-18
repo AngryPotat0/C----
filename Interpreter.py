@@ -6,6 +6,7 @@ class Interpreter():
     def __init__(self,ast):
         self.ast = ast
         self.memory = CallStack()
+        self.function_list = {}
         self.calcu = {
             '+':    lambda a,b: a + b,
             '-':    lambda a,b: a - b,
@@ -41,7 +42,7 @@ class Interpreter():
 
     def visit_print(self,actual_params):
         for param in actual_params:
-            print(self.visit(param))
+            print(param)
 
     def visit_input(self):#FIXME:
         temp = input()
@@ -51,19 +52,36 @@ class Interpreter():
         return self.visiter[type(node).__name__](node)
 
     def visit_Program(self, node):
-        main_function = [function for function in node.function_list if function.name == 'main']
-        if(main_function != []):
-            main_function = main_function[0]
+        # main_function = [function for function in node.function_list if function.name == 'main']
+        # if(main_function != []):
+        #     main_function = main_function[0]
+        # else:
+        #     raise Exception('Main function cannot found')
+        for function in node.function_list:
+            self.function_list[function.name] = function
+        if('main' in self.function_list):
+            status = self.visit_Function(self.function_list['main'],[])
+            return status
         else:
             raise Exception('Main function cannot found')
-        status = self.visit_Function(main_function,[])
-        return status
 
     def visit_Function(self, node, actual_params):
+        formal_params = node.params
+        if(len(formal_params) != len(actual_params)):
+            raise Exception(
+            'Params Error,function {name} need {count} argument, but actually {num}'.format(
+                name=node.name,
+                count=len(formal_params),
+                num=len(actual_params),
+            )
+        )
+
         self.memory.push(Frame(node.name,2))
         current_frame = self.memory.peek()
-        for name, value in zip(node.params, actual_params):
-            current_frame.set_value(name.var_node.value, self.visit(value))
+        for name, value in zip(formal_params, actual_params):
+            # print(name.var_node.value,self.visit(value))
+            current_frame.set_value(name.var_node.value, value)
+        # print(current_frame.get_value('a'))
         return_value = self.visit(node.body)#FIXME:
         self.memory.pop()
         return return_value
@@ -87,7 +105,7 @@ class Interpreter():
     def visit_Var(self, node):
         return self.memory.peek().get_value(node.value)
 
-    def visit_Var_decl(self, node):
+    def visit_Var_decl(self, node):#语义分析阶段已经确定了变量合法性的问题
         pass
 
     def visit_Assign(self, node):
@@ -96,13 +114,15 @@ class Interpreter():
         self.memory.peek().set_value(left,right)
 
     def visit_Function_call(self, node):
-        actual_params = [param for param in node.real_params]
+        actual_params = [self.visit(param) for param in node.real_params]
+        # actual_params = node.real_params
         if(node.function_name == 'print'):
             self.visit_print(actual_params)
         elif(node.function_name == 'input'):
             return self.visit_input()
         else:
-            return self.visit_function(func, actual_params)#FIXME:
+            func = self.function_list[node.function_name]
+            return self.visit_Function(func, actual_params)#FIXME:
 
     def visit_BinOp(self, node):
         op = node.op.value

@@ -50,6 +50,8 @@ class Function_call(AST):
     def __init__(self,function_name,real_params):
         self.function_name = function_name
         self.real_params = real_params#each param is a expr
+        self.params = None
+        self.body = None
 
 class If(AST):
     def __init__(self,expr,block):
