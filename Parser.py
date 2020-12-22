@@ -128,7 +128,9 @@ class Parser():
     def compound_statement(self):#FIXME:
         statement_list = []
         while(self.currentToken.type in (
-            TokenType.ID, TokenType.RETURN, TokenType.IF, TokenType.WHILE, TokenType.FOR,TokenType.BREAK, TokenType.CONTINUE)):
+            TokenType.ID, TokenType.RETURN, TokenType.IF,
+            TokenType.WHILE, TokenType.FOR,TokenType.BREAK, TokenType.CONTINUE
+            )):
             statement_list.append(self.statement())
         return statement_list
 
@@ -141,6 +143,14 @@ class Parser():
             else:
                 result = self.assign()
                 self.eat(TokenType.SEMI)
+        elif(self.currentToken.type == TokenType.BREAK):
+            result = Break()
+            self.eat(TokenType.BREAK)
+            self.eat(TokenType.SEMI)
+        elif(self.currentToken.type == TokenType.CONTINUE):
+            result = Continue()
+            self.eat(TokenType.CONTINUE)
+            self.eat(TokenType.SEMI)
         elif(self.currentToken.type == TokenType.RETURN):
             result = self.return_decl()
         elif(self.currentToken.type == TokenType.IF):
@@ -189,7 +199,6 @@ class Parser():
             block = self.block()
         else:
             block = self.statement()
-            self.eat(TokenType.SEMI)
 
         if(self.currentToken.type == TokenType.ELSE):
             self.eat(TokenType.ELSE)
@@ -197,7 +206,6 @@ class Parser():
                 else_block = self.block()
             else:
                 else_block = self.statement()
-                self.eat(TokenType.SEMI)
                 
         return If(expr,block,else_block)
             
@@ -228,27 +236,9 @@ class Parser():
 
     def block(self):#FIXME:
         self.eat(TokenType.LBRACE)
-        statement_list = []
-        while(self.currentToken.type in (
-                TokenType.ID, TokenType.RETURN, TokenType.IF, TokenType.WHILE, TokenType.FOR,
-                TokenType.BREAK, TokenType.CONTINUE
-            )):
-            if(self.currentToken.type == TokenType.BREAK):
-                statement_list.append(Break())
-                self.eat(TokenType.BREAK)
-                self.eat(TokenType.SEMI)
-            elif(self.currentToken.type == TokenType.CONTINUE):
-                statement_list.append(Continue())
-                self.eat(TokenType.CONTINUE)
-                self.eat(TokenType.SEMI)
-            else:
-                statement_list.append(self.statement())
+        compound_statement = self.compound_statement()
         self.eat(TokenType.RBRACE)
-        return Block(statement_list)
-        # self.eat(TokenType.LBRACE)
-        # compound_statement = self.compound_statement()
-        # self.eat(TokenType.RBRACE)
-        # return Block(compound_statement)
+        return Block(compound_statement)
 
     def expr(self):
         node = self.level_2()
