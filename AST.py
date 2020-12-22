@@ -54,9 +54,10 @@ class Function_call(AST):
         self.body = None
 
 class If(AST):
-    def __init__(self,expr,block):
+    def __init__(self,expr,block,else_block):
         self.expr = expr
         self.block = block
+        self.else_block = else_block
 
 class While(AST):
     def __init__(self,expr,block):

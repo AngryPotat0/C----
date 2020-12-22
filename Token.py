@@ -37,8 +37,11 @@ class TokenType(Enum):
     BOOL =              'bool'
     VOID =              'void'
     IF =                'if'
+    ELSE =              'else'
     FOR =               'for'
     WHILE =             'while'
+    BREAK =             'break'
+    CONTINUE =          'continue'
     RETURN =            'return'
     EOF =               'EOF'
 

@@ -117,21 +117,26 @@ class Parser():
     def compound_statement(self):#FIXME:
         statement_list = []
         while(self.currentToken.type in (TokenType.ID, TokenType.RETURN, TokenType.IF, TokenType.WHILE, TokenType.FOR)):
-            if(self.currentToken.type == TokenType.ID):
-                if(self.lex.currentChar == '('):
-                    statement_list.append(self.function_call())#????????????????????????????
-                    self.eat(TokenType.SEMI)
-                else:
-                    statement_list.append(self.assign())
-            elif(self.currentToken.type == TokenType.RETURN):
-                statement_list.append(self.return_decl())
-            elif(self.currentToken.type == TokenType.IF):
-                statement_list.append(self.if_decl())
-            elif(self.currentToken.type == TokenType.WHILE):
-                statement_list.append(self.while_loop())
-            elif(self.currentToken.type == TokenType.FOR):
-                statement_list.append(self.for_loop())
+            statement_list.append(self.statement())
         return statement_list
+
+    def statement(self):
+        result = None
+        if(self.currentToken.type == TokenType.ID):
+            if(self.lex.currentChar == '('):
+                result = self.function_call()
+                self.eat(TokenType.SEMI)
+            else:
+                result = self.assign()
+        elif(self.currentToken.type == TokenType.RETURN):
+            result = self.return_decl()
+        elif(self.currentToken.type == TokenType.IF):
+            result = self.if_decl()
+        elif(self.currentToken.type == TokenType.WHILE):
+            result = self.while_loop()
+        elif(self.currentToken.type == TokenType.FOR):
+            result = self.for_loop()
+        return result
 
     def assign(self):
         left = self.variable()
@@ -161,8 +166,22 @@ class Parser():
         self.eat(TokenType.LPAREN)
         expr = self.expr()
         self.eat(TokenType.RPAREN)
-        block = self.block()
-        return If(expr,block)
+        block = else_block = None
+
+        if(self.currentToken.type == TokenType.LBRACE):
+            block = self.block()
+        else:
+            block = self.statement()
+
+        if(self.currentToken.type == TokenType.ELSE):
+            self.eat(TokenType.ELSE)
+            if(self.currentToken.type == TokenType.LBRACE):
+                else_block = self.block()
+            else:
+                else_block = self.statement()
+                
+        return If(expr,block,else_block)
+            
 
     def for_loop(self):#FIXME:
         self.eat(TokenType.FOR)

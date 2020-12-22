@@ -164,6 +164,8 @@ class Interpreter():
     def visit_If(self, node):
         if(self.visit(node.expr)):
             return self.visit(node.block)
+        elif(node.else_block != None):
+            return self.visit(node.else_block)
 
     def visit_While(self, node):#TODO: break, continue
         compound_statement = node.block.compound_statement

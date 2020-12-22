@@ -1,9 +1,29 @@
 int main()
 {
-    int a;
+    int a,b;
     a = input();
-    print(solve(a));
+    b = input();
+    if(a + b == 0)
+    {
+        print(0);
+    }
+    else if(a + b <= 100 || a + b > 200)
+    {
+        print(min(a,b));
+    }
+    else
+    {
+        print(100);
+    }
     return 0;
+}
+
+int gcd(int a,int b)
+{
+    if(a % b == 0){
+        return b;
+    }
+    return gcd(b, a % b);
 }
 
 int solve(int a)
@@ -13,4 +33,13 @@ int solve(int a)
         return 1;
     }
     return solve(a - 2) + solve(a - 1);
+}
+
+int min(int a,int b)
+{
+    if(a < b)
+    {
+        return a;
+    }
+    return b;
 }
