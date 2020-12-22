@@ -24,7 +24,9 @@ class Interpreter():
             'Code_Block':   self.visit_Code_Block,
             'Type':         self.visit_Type,
             'Var':          self.visit_Var,
+            'Array':        self.visit_Array,
             'Var_decl':     self.visit_Var_decl,
+            'Array_decl':   self.visit_Array_decl,
             'Assign':       self.visit_Assign,
             'Function_call':self.visit_Function_call,
             'BinOp':        self.visit_BinOp,
@@ -92,7 +94,8 @@ class Interpreter():
     def visit_Code_Block(self, node):
         current_frame = self.memory.peek()
         for decl in node.declarations:
-            current_frame.set_value(decl.var_node.value,0)
+            # current_frame.set_value(decl.var_node.value,0)
+            self.visit(decl)
         for statement in node.compound_statement:
             if(isinstance(statement,Return)):
                 return self.visit_Return(statement)
@@ -106,13 +109,32 @@ class Interpreter():
     def visit_Var(self, node):
         return self.memory.peek().get_value(node.value)
 
+    def visit_Array(self, node):
+        arr_name = node.var_node.value
+        index = self.visit(node.index)
+        return self.memory.peek().get_value(arr_name)[index]
+
     def visit_Var_decl(self, node):#语义分析阶段已经确定了变量合法性的问题
-        pass
+        self.memory.peek().set_value(node.var_node.value,0)
+
+    def visit_Array_decl(self, node):
+        arr_name = node.var_node.value
+        length = self.visit(node.length)
+        arr = [0 for _ in range(length)]
+        self.memory.peek().set_value(arr_name,arr)
 
     def visit_Assign(self, node):
-        left = node.left.value
-        right = self.visit(node.right)
-        self.memory.peek().set_value(left,right)
+        left = node.left
+        if(isinstance(left,Var)):
+            left = node.left.value
+            right = self.visit(node.right)
+            self.memory.peek().set_value(left,right)
+        else:
+            left = left.var_node.value
+            index = self.visit(node.left.index)
+            right = self.visit(node.right)
+            self.memory.peek()[left][index] = right#FIXME:
+            # self.memory.peek().set_value(left,right,index)
 
     def visit_Function_call(self, node):
         actual_params = [self.visit(param) for param in node.real_params]
@@ -172,6 +194,10 @@ class Interpreter():
         while(self.visit(node.expr)):
             # self.visit(node.block)
             for statement in compound_statement:
+                if(isinstance(statement,Continue)):
+                    continue
+                if(isinstance(statement,Break)):
+                    break
                 if(isinstance(statement,Return)):
                     return self.visit_Return(statement)
                 return_value = self.visit(statement)
@@ -179,7 +205,23 @@ class Interpreter():
                     return return_value
 
     def visit_For(self, node):
-        pass
+        assign1 = node.assign1
+        expr = node.expr
+        assign2 = node.assign2
+        compound_statement = node.block.compound_statement
+        self.visit(assign1)
+        while(self.visit(expr)):
+            for statement in compound_statement:
+                if(isinstance(statement,Continue)):
+                    continue
+                if(isinstance(statement,Break)):
+                    break
+                if(isinstance(statement,Return)):
+                    return self.visit_Return(statement)
+                return_value = self.visit(statement)
+                if(return_value != None):
+                    return return_value
+            self.visit(assign2)
 
     def visit_Block(self, node):
         for statement in node.compound_statement:

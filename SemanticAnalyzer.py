@@ -14,7 +14,9 @@ class SemanticAnalyzer():
             'Code_Block':   self.visit_Code_Block,
             'Type':         self.visit_Type,
             'Var':          self.visit_Var,
+            'Array':        self.visit_Array,
             'Var_decl':     self.visit_Var_decl,
+            'Array_decl':   self.visit_Array_decl,
             'Assign':       self.visit_Assign,
             'Function_call':self.visit_Function_call,
             'BinOp':        self.visit_BinOp,
@@ -74,12 +76,17 @@ class SemanticAnalyzer():
         var_name = node.value
         # if(self.scope.lookup(var_name) == None):
         #     self.error("Var not found")
+    def visit_Array(self,node):
+        pass
 
     def visit_Var_decl(self,node):
         var_name = node.var_node.value
         var_type = self.scope.lookup(node.type_node.value)
         var_symbol = VarSymbol(var_name,var_type)
         self.scope.insert(var_symbol)
+
+    def visit_Array_decl(self,node):
+        pass
 
     def visit_Assign(self,node):
         self.visit(node.left)

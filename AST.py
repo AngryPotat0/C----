@@ -36,10 +36,21 @@ class Var(AST):
         self.token = token
         self.value = token.value
 
+class Array(AST):
+    def __init__(self, var_node,index):
+        self.var_node = var_node
+        self.index = index
+
 class Var_decl(AST):
     def __init__(self,var_node, type_node):
         self.var_node = var_node
         self.type_node = type_node
+
+class Array_decl(AST):
+    def __init__(self,var_node, type_node, length):
+        self.var_node = var_node
+        self.type_node = type_node
+        self.length = length
 
 class Assign(AST):
     def __init__(self,left,right):
@@ -65,11 +76,19 @@ class While(AST):
         self.block = block
 
 class For(AST):
-    def __init__(self,assign,expr1,expr2,block):
-        self.assign = assign
-        self.expr1 = expr1
-        self.expr2 = expr2
+    def __init__(self,assign1,expr,assign2,block):
+        self.assign1 = assign1
+        self.expr = expr
+        self.assign2 = assign2
         self.block = block
+
+class Break(AST):
+    def __init__(self):
+        pass
+
+class Continue(AST):
+    def __init__(self):
+        pass
 
 class Block(AST):
     def __init__(self,compound_statement):

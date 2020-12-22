@@ -75,16 +75,27 @@ class Parser():
 
     def var_decl(self):#FIXME:
         var_type = self.type_spec()
-        var_name_list = []
+        decl_list = []
         while(True):
-            var_name_list.append(self.variable())
+            name = self.variable()
+            if(self.currentToken.type == TokenType.LBRACKET):
+                self.eat(TokenType.LBRACKET)
+                expr = self.expr()
+                self.eat(TokenType.RBRACKET)
+                decl_list.append(Array_decl(name,var_type,expr))
+            else:
+                decl_list.append(Var_decl(name,var_type))
             if(self.currentToken.type == TokenType.SEMI):
                 break
             self.eat(TokenType.COMMA)
-        var_list = []
-        for var_name in var_name_list:
-            var_list.append(Var_decl(var_name,var_type))
-        return var_list
+        return decl_list
+
+    def array(self):
+        name = self.variable()
+        self.eat(TokenType.LBRACKET)
+        index = self.expr()
+        self.eat(TokenType.RBRACKET)
+        return Array(name,index)
 
     def type_spec(self):
         if(self.currentToken.type == TokenType.INT):
@@ -116,7 +127,8 @@ class Parser():
 
     def compound_statement(self):#FIXME:
         statement_list = []
-        while(self.currentToken.type in (TokenType.ID, TokenType.RETURN, TokenType.IF, TokenType.WHILE, TokenType.FOR)):
+        while(self.currentToken.type in (
+            TokenType.ID, TokenType.RETURN, TokenType.IF, TokenType.WHILE, TokenType.FOR,TokenType.BREAK, TokenType.CONTINUE)):
             statement_list.append(self.statement())
         return statement_list
 
@@ -128,6 +140,7 @@ class Parser():
                 self.eat(TokenType.SEMI)
             else:
                 result = self.assign()
+                self.eat(TokenType.SEMI)
         elif(self.currentToken.type == TokenType.RETURN):
             result = self.return_decl()
         elif(self.currentToken.type == TokenType.IF):
@@ -139,10 +152,14 @@ class Parser():
         return result
 
     def assign(self):
-        left = self.variable()
+        left = None
+        if(self.lex.currentChar == '['):
+            left = self.array()
+        else:
+            left = self.variable()
         self.eat(TokenType.EQUAL)
         right = self.expr()
-        self.eat(TokenType.SEMI)
+        # self.eat(TokenType.SEMI)
         return Assign(left, right)
 
     def function_call(self):
@@ -172,6 +189,7 @@ class Parser():
             block = self.block()
         else:
             block = self.statement()
+            self.eat(TokenType.SEMI)
 
         if(self.currentToken.type == TokenType.ELSE):
             self.eat(TokenType.ELSE)
@@ -179,6 +197,7 @@ class Parser():
                 else_block = self.block()
             else:
                 else_block = self.statement()
+                self.eat(TokenType.SEMI)
                 
         return If(expr,block,else_block)
             
@@ -186,19 +205,18 @@ class Parser():
     def for_loop(self):#FIXME:
         self.eat(TokenType.FOR)
         self.eat(TokenType.LPAREN)
-        assign = expr1 = expr2 = None
+        assign1 = expr = assign2 = None
         if(self.currentToken.type != TokenType.SEMI):
-            assign = self.assign()
+            assign1 = self.assign()
         self.eat(TokenType.SEMI)
-        if(self.currentToken.type != TokenType.SELF):
-            expr1 = self.expr()
+        if(self.currentToken.type != TokenType.SEMI):
+            expr = self.expr()
         self.eat(TokenType.SEMI)
-        if(self.currentToken.type != TokenType.SELF):
-            expr2 = self.expr()
-        self.eat(TokenType.SEMI)
+        if(self.currentToken.type != TokenType.SEMI):
+            assign2 = self.assign()
         self.eat(TokenType.RPAREN)
         block = self.block()
-        return For(assign,expr1,expr2,block)
+        return For(assign1,expr,assign2,block)
 
     def while_loop(self):
         self.eat(TokenType.WHILE)
@@ -208,11 +226,29 @@ class Parser():
         block = self.block()
         return While(expr,block)
 
-    def block(self):
+    def block(self):#FIXME:
         self.eat(TokenType.LBRACE)
-        compound_statement = self.compound_statement()
+        statement_list = []
+        while(self.currentToken.type in (
+                TokenType.ID, TokenType.RETURN, TokenType.IF, TokenType.WHILE, TokenType.FOR,
+                TokenType.BREAK, TokenType.CONTINUE
+            )):
+            if(self.currentToken.type == TokenType.BREAK):
+                statement_list.append(Break())
+                self.eat(TokenType.BREAK)
+                self.eat(TokenType.SEMI)
+            elif(self.currentToken.type == TokenType.CONTINUE):
+                statement_list.append(Continue())
+                self.eat(TokenType.CONTINUE)
+                self.eat(TokenType.SEMI)
+            else:
+                statement_list.append(self.statement())
         self.eat(TokenType.RBRACE)
-        return Block(compound_statement)
+        return Block(statement_list)
+        # self.eat(TokenType.LBRACE)
+        # compound_statement = self.compound_statement()
+        # self.eat(TokenType.RBRACE)
+        # return Block(compound_statement)
 
     def expr(self):
         node = self.level_2()
@@ -327,7 +363,10 @@ class Parser():
         elif(self.currentToken.type == TokenType.ID):
             if(self.lex.currentChar == '('):
                 return self.function_call()#?????????????????????????
-            node = self.variable()
+            if(self.lex.currentChar == '['):
+                node = self.array()
+            else:
+                node = self.variable()
             return node
         else:
             node = Num(self.currentToken)
