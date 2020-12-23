@@ -3,18 +3,18 @@ int main()
     int a,b;
     int arr[5];
     a = input();
-    b = input();
-    arr[0] = a;
-    arr[1] = b;
-    print(arr[0]);
-    print(arr[35 - 34]);
-    print(arr[0] + arr[35 - 34]);
-    for(a = 0;a < 10;a = a + 1)
+    print(run(a));
+    return 0;
+}
+
+int run(int a)
+{
+    for(;a < 10;a = a + 1)
     {
         if(a == 5)
             continue;
         else if(a == 7)
-            break;
+            return 15;
         print(a);
     }
     return 0;

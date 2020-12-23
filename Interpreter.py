@@ -33,6 +33,8 @@ class Interpreter():
             'UnaryOp':      self.visit_UnaryOp,
             'Num':          self.visit_Num,
             'Return':       self.visit_Return,
+            'Break':        self.visit_Break,
+            'Continue':     self.visit_Continue,
             'If':           self.visit_If,
             'While':        self.visit_While,
             'For':          self.visit_For,
@@ -97,11 +99,9 @@ class Interpreter():
             # current_frame.set_value(decl.var_node.value,0)
             self.visit(decl)
         for statement in node.compound_statement:
-            if(isinstance(statement,Return)):
-                return self.visit_Return(statement)
             return_value = self.visit(statement)
-            if(return_value != None):
-                return return_value
+            if(isinstance(return_value, Return)):
+                return self.visit(return_value.return_expr)
 
     def visit_Type(self, node):
         pass
@@ -180,8 +180,14 @@ class Interpreter():
     def visit_Num(self, node):
         return node.value
 
+    def visit_Break(self, node):
+        return node
+
+    def visit_Continue(self, node):
+        return node
+
     def visit_Return(self, node):
-        return self.visit(node.return_expr)
+        return node
 
     def visit_If(self, node):
         if(self.visit(node.expr)):
@@ -192,43 +198,41 @@ class Interpreter():
     def visit_While(self, node):#TODO: break, continue
         compound_statement = node.block.compound_statement
         while(self.visit(node.expr)):
-            # self.visit(node.block)
             for statement in compound_statement:
-                if(isinstance(statement,Continue)):
-                    continue
-                if(isinstance(statement,Break)):
-                    break
-                if(isinstance(statement,Return)):
-                    return self.visit_Return(statement)
                 return_value = self.visit(statement)
-                if(return_value != None):
-                    return return_value
+                if(isinstance(return_value,Continue)):
+                    break
+                if(isinstance(return_value,Break)):
+                    return
+                if(isinstance(return_value,Return)):
+                    return self.visit(return_value.expr)#FIXME:
 
     def visit_For(self, node):
         assign1 = node.assign1
         expr = node.expr
         assign2 = node.assign2
         compound_statement = node.block.compound_statement
-        self.visit(assign1)
+        if(assign1 != None):
+            self.visit(assign1)
         while(self.visit(expr)):
             for statement in compound_statement:
-                if(isinstance(statement,Continue)):
-                    continue
-                if(isinstance(statement,Break)):
-                    break
-                if(isinstance(statement,Return)):
-                    return self.visit_Return(statement)
                 return_value = self.visit(statement)
-                if(return_value != None):
-                    return return_value
+                if(isinstance(return_value,Continue)):
+                    break
+                if(isinstance(return_value,Break)):
+                    return
+                if(isinstance(return_value,Return)):
+                    return return_value#FIXME:
             self.visit(assign2)
 
     def visit_Block(self, node):
         for statement in node.compound_statement:
-            if(isinstance(statement,Return)):
-                return self.visit_Return(statement)
             return_value = self.visit(statement)
-            if(return_value != None):
+            if(isinstance(return_value,Return)):
+                return return_value
+            if(isinstance(return_value,Break)):
+                return return_value
+            if(isinstance(return_value,Continue)):
                 return return_value
     
     def run(self):
