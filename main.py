@@ -4,6 +4,7 @@ from Interpreter import*
 from Token import*
 from test import*
 from SemanticAnalyzer import*
+from Useless import*
 def main():
     # reserved_keywords()
     text = ""
@@ -19,8 +20,11 @@ def main():
     ast = parser.parser()
     seman = SemanticAnalyzer(ast,1)
     seman.run()
-    interpreter = Interpreter(ast)
-    interpreter.run()
+    asm = ToAsm(ast)
+    asm.run()
+
+    # interpreter = Interpreter(ast)
+    # interpreter.run()
     # test = Test(ast)
     # test.run()
 

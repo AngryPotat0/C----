@@ -1,21 +1,8 @@
 int main()
 {
-    int a,b;
-    int arr[5];
-    a = input();
-    print(run(a));
-    return 0;
-}
-
-int run(int a)
-{
-    for(;a < 10;a = a + 1)
-    {
-        if(a == 5)
-            continue;
-        else if(a == 7)
-            return 15;
-        print(a);
-    }
-    return 0;
+    int a,b,c;
+    a = 10;
+    b = 20;
+    c = a + b;
+    c = b - a;
 }
