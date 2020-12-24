@@ -7,7 +7,8 @@ class ToAsm():
         self.ast = ast
         self.function_list = {}
         self.table = {}
-        self.addreess = 0
+        self.address = 0
+        self.rsp = 0
         self.asm = []
         self.visiter = {
             'Program':      self.visit_Program,
@@ -58,28 +59,45 @@ class ToAsm():
     def visit_Code_Block(self, node):
         for decl in node.declarations:
             self.visit(decl)
+        self.rsp = self.address
         for statement in node.compound_statement:
             self.visit(statement)
 
     def visit_Var(self, node):
-        addreess = hex(self.table[node.value])
-        self.asm.append('LDA {addr}'.format(addr=addreess))
+        address = self.hex(self.table[node.value])
+        self.asm.append('LDA {addr}'.format(addr=address))
 
     def visit_Var_decl(self, node):#语义分析阶段已经确定了变量合法性的问题
-        self.table[node.var_node.value] = self.addreess
-        self.addreess += 1
+        self.table[node.var_node.value] = self.address
+        self.address += 1
 
     def visit_Assign(self, node):
-        address = hex(self.table[node.left.value])
+        address = self.hex(self.table[node.left.value])
         self.visit(node.right)
         self.asm.append('STA {addr}'.format(addr=address))
 
     def visit_BinOp(self, node):
         OP = 'ADD' if node.op.value == '+' else 'SUB'
+        self.visit(node.left)
+        self.push('A')
         self.visit(node.right)
         self.asm.append('MOV R0 A')
-        self.visit(node.left)
-        self.asm.append('{op} A R0'.format(op = OP))
+        self.pop('A')
+        self.asm.append('{op} A R0'.format(op=OP))
+
+    def push(self, distance):
+        # self.asm.append('PUSH {dist}'.format(dist=distance))
+        if(distance != 'A'):
+            self.asm.append('MOV A {dist}'.format(dist=distance))
+        self.asm.append('STA {addr}'.format(addr=self.hex(self.rsp)))
+        self.rsp += 1
+
+    def pop(self, distance):
+        # self.asm.append('POP {dist}'.format(dist=distance))
+        self.rsp -= 1
+        self.asm.append('LDA {addr}'.format(addr=self.hex(self.rsp)))
+        if(distance != 'A'):
+            self.asm.append('MOV {dist} A'.format(dist=distance))
 
     def visit_Num(self, node):
         self.asm.append('MOV A #{data}'.format(data=node.value))
@@ -104,3 +122,13 @@ class ToAsm():
 
     def visit_Block(self, node):
         pass
+
+    def hex(self, value):
+        if(value == 0):
+            return '0H'
+        lis = ['0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F']
+        res = ''
+        while(value != 0):
+            res = (lis[value % 16]) + res
+            value = value // 16
+        return res + 'H'

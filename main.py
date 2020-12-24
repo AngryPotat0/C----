@@ -5,6 +5,7 @@ from Token import*
 from test import*
 from SemanticAnalyzer import*
 from Useless import*
+from simi import*
 def main():
     # reserved_keywords()
     text = ""
@@ -22,6 +23,8 @@ def main():
     seman.run()
     asm = ToAsm(ast)
     asm.run()
+    s = Simi(asm.asm)
+    s.run()
 
     # interpreter = Interpreter(ast)
     # interpreter.run()

@@ -1,8 +1,9 @@
 int main()
 {
-    int a,b,c;
+    int a,b,c,d;
     a = 10;
     b = 20;
-    c = a + b;
-    c = b - a;
+    c =  a - (b - 12);
+    d = a + b + c;
+    return 0;
 }
