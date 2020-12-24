@@ -37,8 +37,10 @@ class ToAsm():
     def run(self):
         self.visit(self.ast)
         self.asm.append('HALT')
+        i = 0
         for command in self.asm:
-            print(command)
+            print(self.hex(i) ,command)
+            i += 1
 
     
     def visit(self,node):
@@ -77,13 +79,19 @@ class ToAsm():
         self.asm.append('STA {addr}'.format(addr=address))
 
     def visit_BinOp(self, node):
-        OP = 'ADD' if node.op.value == '+' else 'SUB'
-        self.visit(node.left)
-        self.push('A')
-        self.visit(node.right)
-        self.asm.append('MOV R0 A')
-        self.pop('A')
-        self.asm.append('{op} A R0'.format(op=OP))
+        if(node.op.value in ('+', '-')):
+            OP = 'ADD' if node.op.value == '+' else 'SUB'
+            self.visit(node.left)
+            self.push('A')
+            self.visit(node.right)
+            self.asm.append('MOV R0 A')
+            self.pop('A')
+            self.asm.append('{op} A R0'.format(op=OP))
+        elif(node.op.value == '=='):
+            self.visit(node.left)
+            self.asm.append('MOV R1 A')
+            self.visit(node.right)
+            self.asm.append('SUB A R1')
 
     def push(self, distance):
         # self.asm.append('PUSH {dist}'.format(dist=distance))
@@ -111,17 +119,45 @@ class ToAsm():
     def visit_Return(self, node):
         pass
 
-    def visit_If(self, node):
-        pass
+    def visit_If(self, node):#TODO:也许可以优化一下else_block为None的情况
+        expr = node.expr
+        block1 = node.block
+        block2 = node.else_block
+        L = len(self.asm)
+        self.visit(expr)
+        self.asm.append('JZ {dist}'.format(dist=self.hex(len(self.asm) + 2)))
+        self.asm.append('JMP BLK2')
+        BLK = len(self.asm)
+        self.visit(block1)
+        self.asm.append('JMP END')
+        BLK2 = len(self.asm)
+        if(block2 != None):
+            self.visit(block2)
+        END = len(self.asm)
+        self.asm[BLK - 1] = 'JMP {dist}'.format(dist=self.hex(BLK2))
+        self.asm[BLK2 - 1] = 'JMP {dist}'.format(dist=self.hex(END))
 
-    def visit_While(self, node):#TODO: break, continue
-        pass
+    def visit_While(self, node):#FIXME:
+        expr = node.expr
+        block1 = node.block
+        block2 = node.else_block
+        L = len(self.asm)
+        self.visit(expr)
+        self.asm.append('JZ {dist}'.format(dist=self.hex(len(self.asm) + 2)))
+        self.asm.append('JMP END')
+        BLK = len(self.asm)
+        self.visit(block1)
+        self.asm.append('JMP {dist}'.format(dist=self.hex(L)))
+        END = len(self.asm)
+        self.visit(block2)
+        self.asm[BLK - 1] = 'JMP {dist}'.format(dist=self.hex(END))
 
     def visit_For(self, node):
         pass
 
     def visit_Block(self, node):
-        pass
+        for statement in node.compound_statement:
+            self.visit(statement)
 
     def hex(self, value):
         if(value == 0):

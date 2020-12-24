@@ -15,7 +15,9 @@ class Simi():
         }
     
     def run(self):
-        for cmd in self.code:
+        while(True):
+            cmd = self.code[self.pc]
+            self.pc += 1
             lis = cmd.split()
             if(lis[0] == 'MOV'):
                 self.mov(lis[1], lis[2])
@@ -23,12 +25,16 @@ class Simi():
                 self.add(lis[2])
             elif(lis[0] == 'SUB'):
                 self.sub(lis[2])
+            elif(lis[0] == 'JZ'):
+                self.jz(lis[1])
+            elif(lis[0] == 'JMP'):
+                self.jmp(lis[1])
             elif(lis[0] == 'STA'):
                 self.sta(lis[1])
             elif(lis[0] == 'LDA'):
                 self.lda(lis[1])
             elif(lis[0] == 'HALT'):
-                self.halt()
+                break
             else:
                 raise Exception('Unexpectde code')
         for i in range(0,20):
@@ -48,6 +54,13 @@ class Simi():
             # print('*********')
         else:
             self.registers[distance] = self.registers[source]
+
+    def jz(self, distance):
+        if(self.registers['A'] == 0):
+            self.pc = self.toTen(distance)
+
+    def jmp(self, distance):
+        self.pc = self.toTen(distance)
 
     def lda(self, address):
         address = self.toTen(address)
