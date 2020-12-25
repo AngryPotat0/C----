@@ -9,6 +9,8 @@ class Simi():
             'R1': 0,
             'R2': 0,
             'R3': 0,
+            'Z':  0,
+            'C':  0,
         }
         self.table = {
             '0':0,'1':1,'2':2,'3':3,'4':4,'5':5,'6':6,'7':7,'8':8,'9':9,'A':10,'B':11,'C':12,'D':13,'E':14,'F':15
@@ -27,6 +29,8 @@ class Simi():
                 self.sub(lis[2])
             elif(lis[0] == 'JZ'):
                 self.jz(lis[1])
+            elif(lis[0] == 'JC'):
+                self.jc(lis[1])
             elif(lis[0] == 'JMP'):
                 self.jmp(lis[1])
             elif(lis[0] == 'STA'):
@@ -42,9 +46,27 @@ class Simi():
 
     def add(self,register):
         self.registers['A'] += self.registers[register]
+        if(self.registers['A'] > 255):
+            self.registers['A'] = self.registers['A'] & 0xff
+            self.registers['C'] = 1
+        else:
+            self.registers['C'] = 0
+        if(self.registers['A'] == 0):
+            self.registers['Z'] = 1
+        else:
+            self.registers['Z'] = 0
 
-    def sub(self,register):
-        self.registers['A'] -= self.registers[register]
+    def sub(self,registers):
+        self.registers['A'] -= self.registers[registers]
+        if(self.registers['A'] >= 0):
+            self.registers['C'] = 0
+        else:
+            self.registers['A'] = self.registers['A'] & 0xff
+            self.registers['C'] = 1
+        if(self.registers['A'] == 0):
+            self.registers['Z'] = 1
+        else:
+            self.registers['Z'] = 0
     
     def mov(self, distance, source):
         if(source[0] == '#'):
@@ -56,7 +78,11 @@ class Simi():
             self.registers[distance] = self.registers[source]
 
     def jz(self, distance):
-        if(self.registers['A'] == 0):
+        if(self.registers['Z'] == 1 or self.registers['A'] == 0):
+            self.pc = self.toTen(distance)
+
+    def jc(self, distance):
+        if(self.registers['C'] == 1):
             self.pc = self.toTen(distance)
 
     def jmp(self, distance):
@@ -82,3 +108,14 @@ class Simi():
             t += 1
         return res
 
+
+# text = ""
+# file = open('code.txt')
+# while(True):
+#     line = file.readline()
+#     text += line
+#     if(not line):
+#         break
+# file.close()
+# s = Simi(text.split('\n'))
+# s.run()

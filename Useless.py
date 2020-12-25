@@ -78,7 +78,7 @@ class ToAsm():
         self.visit(node.right)
         self.asm.append('STA {addr}'.format(addr=address))
 
-    def visit_BinOp(self, node):
+    def visit_BinOp(self, node):#关于逻辑运算，0为True，非0为False
         if(node.op.value in ('+', '-')):
             OP = 'ADD' if node.op.value == '+' else 'SUB'
             self.visit(node.left)
@@ -92,6 +92,55 @@ class ToAsm():
             self.asm.append('MOV R1 A')
             self.visit(node.right)
             self.asm.append('SUB A R1')
+        elif(node.op.value == '!='):
+            self.visit(node.rigth)
+            self.asm.append('MOV R1 A')
+            self.visit(node.left)
+            self.asm.append('SUB A R1')
+            self.asm.append('JZ {addr}'.format(addr=self.hex(len(self.asm) + 2)))
+            self.asm.append('JMP {addr}'.format(addr=self.hex(len(self.asm) + 2)))
+            self.asm.append('MOV A #01')
+        elif(node.op.value == '>='):
+            self.visit(node.right)
+            self.asm.append('MOV R1 A')
+            self.visit(node.left)
+            self.asm.append('SUB A R1')
+            self.asm.append('JC {addr}'.format(addr=self.hex(len(self.asm) + 2)))
+            self.asm.append('JMP {addr}'.format(addr=self.hex(len(self.asm) + 3)))
+            self.asm.append('MOV A #01')
+            self.asm.append('JMP {addr}'.format(addr=self.hex(len(self.asm) + 2)))
+            self.asm.append('MOV A #0')
+        elif(node.op.value == '<='):
+            self.visit(node.left)
+            self.asm.append('MOV R1 A')
+            self.visit(node.right)
+            self.asm.append('SUB A R1')
+            self.asm.append('JC {addr}'.format(addr=self.hex(len(self.asm) + 2)))
+            self.asm.append('JMP {addr}'.format(addr=self.hex(len(self.asm) + 3)))
+            self.asm.append('MOV A #01')
+            self.asm.append('JMP {addr}'.format(addr=self.hex(len(self.asm) + 2)))
+            self.asm.append('MOV A #0')
+        elif(node.op.value == '<'):
+            self.visit(node.right)
+            self.asm.append('MOV R1 A')
+            self.visit(node.left)
+            self.asm.append('SUB A R1')
+            self.asm.append('JC {addr}'.format(addr=self.hex(len(self.asm) + 2)))
+            self.asm.append('JMP {addr}'.format(addr=self.hex(len(self.asm) + 3)))
+            self.asm.append('MOV A #00')
+            self.asm.append('JMP {addr}'.format(addr=self.hex(len(self.asm) + 2)))
+            self.asm.append('MOV A #01')
+        elif(node.op.value == '>'):
+            self.visit(node.left)
+            self.asm.append('MOV R1 A')
+            self.visit(node.right)
+            self.asm.append('SUB A R1')
+            self.asm.append('JC {addr}'.format(addr=self.hex(len(self.asm) + 2)))
+            self.asm.append('JMP {addr}'.format(addr=self.hex(len(self.asm) + 3)))
+            self.asm.append('MOV A #00')
+            self.asm.append('JMP {addr}'.format(addr=self.hex(len(self.asm) + 2)))
+            self.asm.append('MOV A #01')
+
 
     def push(self, distance):
         # self.asm.append('PUSH {dist}'.format(dist=distance))
