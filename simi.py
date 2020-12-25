@@ -78,7 +78,7 @@ class Simi():
             self.registers[distance] = self.registers[source]
 
     def jz(self, distance):
-        if(self.registers['Z'] == 1 or self.registers['A'] == 0):
+        if(self.registers['A'] == 0):
             self.pc = self.toTen(distance)
 
     def jc(self, distance):

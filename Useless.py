@@ -17,9 +17,9 @@ class ToAsm():
             'Code_Block':   self.visit_Code_Block,
             # 'Type':         self.visit_Type,
             'Var':          self.visit_Var,
-            # 'Array':        self.visit_Array,
+            'Array':        self.visit_Array,
             'Var_decl':     self.visit_Var_decl,
-            # 'Array_decl':   self.visit_Array_decl,
+            'Array_decl':   self.visit_Array_decl,
             'Assign':       self.visit_Assign,
             # 'Function_call':self.visit_Function_call,
             'BinOp':        self.visit_BinOp,
@@ -93,11 +93,12 @@ class ToAsm():
             self.visit(node.right)
             self.asm.append('SUB A R1')
         elif(node.op.value == '!='):
-            self.visit(node.rigth)
+            self.visit(node.right)
             self.asm.append('MOV R1 A')
             self.visit(node.left)
             self.asm.append('SUB A R1')
-            self.asm.append('JZ {addr}'.format(addr=self.hex(len(self.asm) + 2)))
+            self.asm.append('JZ {addr}'.format(addr=self.hex(len(self.asm) + 3)))
+            self.asm.append('MOV A #0')
             self.asm.append('JMP {addr}'.format(addr=self.hex(len(self.asm) + 2)))
             self.asm.append('MOV A #01')
         elif(node.op.value == '>='):
@@ -188,18 +189,17 @@ class ToAsm():
 
     def visit_While(self, node):#FIXME:
         expr = node.expr
-        block1 = node.block
-        block2 = node.else_block
-        L = len(self.asm)
+        block = node.block
+        LOOP = len(self.asm)
         self.visit(expr)
-        self.asm.append('JZ {dist}'.format(dist=self.hex(len(self.asm) + 2)))
+        self.asm.append('JZ {dist}'.format(dist = self.hex(len(self.asm) + 2)))
         self.asm.append('JMP END')
         BLK = len(self.asm)
-        self.visit(block1)
-        self.asm.append('JMP {dist}'.format(dist=self.hex(L)))
+        self.visit(block)
+        self.asm.append('JMP {dist}'.format(dist = self.hex(LOOP)))
         END = len(self.asm)
-        self.visit(block2)
-        self.asm[BLK - 1] = 'JMP {dist}'.format(dist=self.hex(END))
+        self.asm[BLK - 1] = 'JMP {dist}'.format(dist = self.hex(END))
+
 
     def visit_For(self, node):
         pass
