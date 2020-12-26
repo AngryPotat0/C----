@@ -2,7 +2,7 @@ class Simi():
     def __init__(self,code):
         self.code = code
         self.pc = 0
-        self.memory = [0] * 100
+        self.memory = [0] * 256
         self.registers = {
             'A':  0,
             'R0': 0,
@@ -18,15 +18,21 @@ class Simi():
     
     def run(self):
         while(True):
+            if(self.code[self.pc] == ''):
+                self.pc += 1
+                continue
             cmd = self.code[self.pc]
             self.pc += 1
             lis = cmd.split()
             if(lis[0] == 'MOV'):
-                self.mov(lis[1], lis[2])
+                t = lis[1].split(',')
+                self.mov(t[0],t[1])
             elif(lis[0] == 'ADD'):
-                self.add(lis[2])
+                t = lis[1].split(',')
+                self.add(t[1])
             elif(lis[0] == 'SUB'):
-                self.sub(lis[2])
+                t = lis[1].split(',')
+                self.sub(t[1])
             elif(lis[0] == 'JZ'):
                 self.jz(lis[1])
             elif(lis[0] == 'JC'):
@@ -41,7 +47,7 @@ class Simi():
                 break
             else:
                 raise Exception('Unexpectde code')
-        for i in range(0,20):
+        for i in range(200,221):
             print(i,self.memory[i])
 
     def add(self,register):

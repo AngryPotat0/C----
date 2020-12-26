@@ -25,6 +25,11 @@ def main():
     asm.run()
     s = Simi(asm.asm)
     s.run()
+    with open('code.txt', 'w') as f:
+        for data in asm.asm:
+            if(data != ''):
+                f.write(data + '\n')
+
 
     # interpreter = Interpreter(ast)
     # interpreter.run()

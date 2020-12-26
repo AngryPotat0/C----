@@ -7,7 +7,7 @@ class ToAsm():
         self.ast = ast
         self.function_list = {}
         self.table = {}
-        self.address = 0
+        self.address = 200
         self.rsp = 0
         self.asm = []
         self.visiter = {
@@ -17,9 +17,9 @@ class ToAsm():
             'Code_Block':   self.visit_Code_Block,
             # 'Type':         self.visit_Type,
             'Var':          self.visit_Var,
-            'Array':        self.visit_Array,
+            # 'Array':        self.visit_Array,
             'Var_decl':     self.visit_Var_decl,
-            'Array_decl':   self.visit_Array_decl,
+            # 'Array_decl':   self.visit_Array_decl,
             'Assign':       self.visit_Assign,
             # 'Function_call':self.visit_Function_call,
             'BinOp':        self.visit_BinOp,
@@ -37,10 +37,12 @@ class ToAsm():
     def run(self):
         self.visit(self.ast)
         self.asm.append('HALT')
-        i = 0
+        i = -1
         for command in self.asm:
-            print(self.hex(i) ,command)
             i += 1
+            if(command == ''):
+                continue
+            print(self.hex(i) ,command)
 
     
     def visit(self,node):
@@ -68,6 +70,7 @@ class ToAsm():
     def visit_Var(self, node):
         address = self.hex(self.table[node.value])
         self.asm.append('LDA {addr}'.format(addr=address))
+        self.asm.append('')
 
     def visit_Var_decl(self, node):#语义分析阶段已经确定了变量合法性的问题
         self.table[node.var_node.value] = self.address
@@ -77,6 +80,7 @@ class ToAsm():
         address = self.hex(self.table[node.left.value])
         self.visit(node.right)
         self.asm.append('STA {addr}'.format(addr=address))
+        self.asm.append('')
 
     def visit_BinOp(self, node):#关于逻辑运算，0为True，非0为False
         if(node.op.value in ('+', '-')):
@@ -84,81 +88,108 @@ class ToAsm():
             self.visit(node.left)
             self.push('A')
             self.visit(node.right)
-            self.asm.append('MOV R0 A')
+            self.asm.append('MOV R0,A')
             self.pop('A')
-            self.asm.append('{op} A R0'.format(op=OP))
+            self.asm.append('{op} A,R0'.format(op=OP))
         elif(node.op.value == '=='):
             self.visit(node.left)
-            self.asm.append('MOV R1 A')
+            self.asm.append('MOV R1,A')
             self.visit(node.right)
-            self.asm.append('SUB A R1')
+            self.asm.append('SUB A,R1')
         elif(node.op.value == '!='):
             self.visit(node.right)
-            self.asm.append('MOV R1 A')
+            self.asm.append('MOV R1,A')
             self.visit(node.left)
-            self.asm.append('SUB A R1')
-            self.asm.append('JZ {addr}'.format(addr=self.hex(len(self.asm) + 3)))
-            self.asm.append('MOV A #0')
-            self.asm.append('JMP {addr}'.format(addr=self.hex(len(self.asm) + 2)))
-            self.asm.append('MOV A #01')
+            self.asm.append('SUB A,R1')
+            self.asm.append('JZ {addr}'.format(addr=self.hex(len(self.asm) + 6)))
+            self.asm.append('')
+            self.asm.append('MOV A,#0')
+            self.asm.append('')
+            self.asm.append('JMP {addr}'.format(addr=self.hex(len(self.asm) + 4)))
+            self.asm.append('')
+            self.asm.append('MOV A,#01')
+            self.asm.append('')
         elif(node.op.value == '>='):
             self.visit(node.right)
-            self.asm.append('MOV R1 A')
+            self.asm.append('MOV R1,A')
             self.visit(node.left)
-            self.asm.append('SUB A R1')
-            self.asm.append('JC {addr}'.format(addr=self.hex(len(self.asm) + 2)))
-            self.asm.append('JMP {addr}'.format(addr=self.hex(len(self.asm) + 3)))
-            self.asm.append('MOV A #01')
-            self.asm.append('JMP {addr}'.format(addr=self.hex(len(self.asm) + 2)))
-            self.asm.append('MOV A #0')
+            self.asm.append('SUB A,R1')
+            self.asm.append('JC {addr}'.format(addr=self.hex(len(self.asm) + 4)))
+            self.asm.append('')
+            self.asm.append('JMP {addr}'.format(addr=self.hex(len(self.asm) + 6)))
+            self.asm.append('')
+            self.asm.append('MOV A,#01')
+            self.asm.append('')
+            self.asm.append('JMP {addr}'.format(addr=self.hex(len(self.asm) + 4)))
+            self.asm.append('')
+            self.asm.append('MOV A,#0')
+            self.asm.append('')
         elif(node.op.value == '<='):
             self.visit(node.left)
-            self.asm.append('MOV R1 A')
+            self.asm.append('MOV R1,A')
             self.visit(node.right)
-            self.asm.append('SUB A R1')
-            self.asm.append('JC {addr}'.format(addr=self.hex(len(self.asm) + 2)))
-            self.asm.append('JMP {addr}'.format(addr=self.hex(len(self.asm) + 3)))
-            self.asm.append('MOV A #01')
-            self.asm.append('JMP {addr}'.format(addr=self.hex(len(self.asm) + 2)))
-            self.asm.append('MOV A #0')
+            self.asm.append('SUB A,R1')
+            self.asm.append('JC {addr}'.format(addr=self.hex(len(self.asm) + 4)))
+            self.asm.append('')
+            self.asm.append('JMP {addr}'.format(addr=self.hex(len(self.asm) + 6)))
+            self.asm.append('')
+            self.asm.append('MOV A,#01')
+            self.asm.append('')
+            self.asm.append('JMP {addr}'.format(addr=self.hex(len(self.asm) + 4)))
+            self.asm.append('')
+            self.asm.append('MOV A,#0')
+            self.asm.append('')
         elif(node.op.value == '<'):
             self.visit(node.right)
-            self.asm.append('MOV R1 A')
+            self.asm.append('MOV R1,A')
             self.visit(node.left)
-            self.asm.append('SUB A R1')
-            self.asm.append('JC {addr}'.format(addr=self.hex(len(self.asm) + 2)))
-            self.asm.append('JMP {addr}'.format(addr=self.hex(len(self.asm) + 3)))
-            self.asm.append('MOV A #00')
-            self.asm.append('JMP {addr}'.format(addr=self.hex(len(self.asm) + 2)))
-            self.asm.append('MOV A #01')
+            self.asm.append('SUB A,R1')
+            self.asm.append('JC {addr}'.format(addr=self.hex(len(self.asm) + 4)))
+            self.asm.append('')
+            self.asm.append('JMP {addr}'.format(addr=self.hex(len(self.asm) + 6)))
+            self.asm.append('')
+            self.asm.append('MOV A,#00')
+            self.asm.append('')
+            self.asm.append('JMP {addr}'.format(addr=self.hex(len(self.asm) + 4)))
+            self.asm.append('')
+            self.asm.append('MOV A,#01')
+            self.asm.append('')
         elif(node.op.value == '>'):
             self.visit(node.left)
-            self.asm.append('MOV R1 A')
+            self.asm.append('MOV R1,A')
             self.visit(node.right)
-            self.asm.append('SUB A R1')
-            self.asm.append('JC {addr}'.format(addr=self.hex(len(self.asm) + 2)))
-            self.asm.append('JMP {addr}'.format(addr=self.hex(len(self.asm) + 3)))
-            self.asm.append('MOV A #00')
-            self.asm.append('JMP {addr}'.format(addr=self.hex(len(self.asm) + 2)))
-            self.asm.append('MOV A #01')
+            self.asm.append('SUB A,R1')
+            self.asm.append('JC {addr}'.format(addr=self.hex(len(self.asm) + 4)))
+            self.asm.append('')
+            self.asm.append('JMP {addr}'.format(addr=self.hex(len(self.asm) + 6)))
+            self.asm.append('')
+            self.asm.append('MOV A,#00')
+            self.asm.append('')
+            self.asm.append('JMP {addr}'.format(addr=self.hex(len(self.asm) + 4)))
+            self.asm.append('')
+            self.asm.append('MOV A,#01')
+            self.asm.append('')
 
 
     def push(self, distance):
         # self.asm.append('PUSH {dist}'.format(dist=distance))
         if(distance != 'A'):
-            self.asm.append('MOV A {dist}'.format(dist=distance))
+            self.asm.append('MOV A,{dist}'.format(dist=distance))
         self.asm.append('STA {addr}'.format(addr=self.hex(self.rsp)))
+        self.asm.append('')
         self.rsp += 1
 
     def pop(self, distance):
         # self.asm.append('POP {dist}'.format(dist=distance))
         self.rsp -= 1
         self.asm.append('LDA {addr}'.format(addr=self.hex(self.rsp)))
+        self.asm.append('')
         if(distance != 'A'):
-            self.asm.append('MOV {dist} A'.format(dist=distance))
+            self.asm.append('MOV {dist},A'.format(dist=distance))
 
     def visit_Num(self, node):
-        self.asm.append('MOV A #{data}'.format(data=node.value))
+        self.asm.append('MOV A,#{data}'.format(data=node.value))
+        self.asm.append('')
 
     def visit_Break(self, node):
         pass
@@ -175,30 +206,36 @@ class ToAsm():
         block2 = node.else_block
         L = len(self.asm)
         self.visit(expr)
-        self.asm.append('JZ {dist}'.format(dist=self.hex(len(self.asm) + 2)))
+        self.asm.append('JZ {dist}'.format(dist=self.hex(len(self.asm) + 4)))
+        self.asm.append('')
         self.asm.append('JMP BLK2')
+        self.asm.append('')
         BLK = len(self.asm)
         self.visit(block1)
         self.asm.append('JMP END')
+        self.asm.append('')
         BLK2 = len(self.asm)
         if(block2 != None):
             self.visit(block2)
         END = len(self.asm)
-        self.asm[BLK - 1] = 'JMP {dist}'.format(dist=self.hex(BLK2))
-        self.asm[BLK2 - 1] = 'JMP {dist}'.format(dist=self.hex(END))
+        self.asm[BLK - 2] = 'JMP {dist}'.format(dist=self.hex(BLK2))
+        self.asm[BLK2 - 2] = 'JMP {dist}'.format(dist=self.hex(END))
 
     def visit_While(self, node):#FIXME:
         expr = node.expr
         block = node.block
         LOOP = len(self.asm)
         self.visit(expr)
-        self.asm.append('JZ {dist}'.format(dist = self.hex(len(self.asm) + 2)))
+        self.asm.append('JZ {dist}'.format(dist = self.hex(len(self.asm) + 4)))
+        self.asm.append('')
         self.asm.append('JMP END')
+        self.asm.append('')
         BLK = len(self.asm)
         self.visit(block)
         self.asm.append('JMP {dist}'.format(dist = self.hex(LOOP)))
+        self.asm.append('')
         END = len(self.asm)
-        self.asm[BLK - 1] = 'JMP {dist}'.format(dist = self.hex(END))
+        self.asm[BLK - 2] = 'JMP {dist}'.format(dist = self.hex(END))
 
 
     def visit_For(self, node):
