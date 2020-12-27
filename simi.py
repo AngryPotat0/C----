@@ -48,7 +48,7 @@ class Simi():
             else:
                 raise Exception('Unexpectde code')
         for i in range(200,221):
-            print(i,self.memory[i])
+            print(hex(i),self.memory[i])
 
     def add(self,register):
         self.registers['A'] += self.registers[register]

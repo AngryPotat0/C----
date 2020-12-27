@@ -239,7 +239,25 @@ class ToAsm():
 
 
     def visit_For(self, node):
-        pass
+        assign1 = node.assign1
+        expr = node.expr
+        assign2 = node.assign2
+        block = node.block
+        self.visit(assign1)
+        LOOP = len(self.asm)
+        self.visit(expr)
+        self.asm.append('JZ {BLK}'.format(BLK = self.hex(len(self.asm) + 4)))
+        self.asm.append('')
+        self.asm.append('JMP END')
+        self.asm.append('')
+        BLK = len(self.asm)
+        self.visit(block)
+        self.visit(assign2)
+        self.asm.append('JMP {dist}'.format(dist = self.hex(LOOP)))
+        self.asm.append('')
+        END = len(self.asm)
+        self.asm[BLK - 2] = 'JMP {dist}'.format(dist = self.hex(END))
+
 
     def visit_Block(self, node):
         for statement in node.compound_statement:
